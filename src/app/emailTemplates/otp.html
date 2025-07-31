@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Verification Code</title>
+    <style>
+      /* Base styles */
+      body {
+        background-color: #f6f6f6;
+        font-family: sans-serif;
+        font-size: 14px;
+        line-height: 1.4;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Container styles */
+      .container {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fbfbfc;
+        border-radius: 12px;
+      }
+
+      /* Email body */
+      .email-body {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        padding-bottom: 20px;
+      }
+
+      .header h1 {
+        color: #333333;
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      /* Content */
+      .content {
+        padding-bottom: 20px;
+      }
+
+      .content p {
+        font-family: sans-serif;
+        font-size: 14px;
+        font-weight: normal;
+        margin: 0 0 15px;
+        color: #333333;
+      }
+
+      /* OTP code */
+      .otp-container {
+        border-radius: 4px;
+        padding: 20px;
+        padding-bottom: 5px;
+        margin-bottom: 24px;
+        text-align: center;
+      }
+
+      .otp-code {
+        font-family: monospace;
+        font-size: 28px !important;
+        font-weight: bold !important;
+        margin: 0;
+        color: #1893f8 !important;
+        letter-spacing: 7px;
+      }
+
+      /* Footer */
+      .footer {
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .footer p {
+        font-family: sans-serif;
+        font-size: 12px;
+        font-weight: normal;
+        margin: 0;
+        color: #6c757d;
+      }
+
+      .footer p.copyright {
+        margin-top: 10px;
+      }
+
+      /* Responsive styles */
+      @media only screen and (max-width: 620px) {
+        .container {
+          width: 100% !important;
+          padding: 10px !important;
+        }
+
+        .email-body {
+          padding: 10px !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="email-body">
+        <div class="header">
+          <h1>Site Flow</h1>
+        </div>
+        <div class="content">
+          <p>Hello,</p>
+          <p>
+            We received a request to verify your account. Use the verification
+            code below to complete the process:
+          </p>
+          <div class="otp-container">
+            <p class="otp-code">{{otp}}</p>
+          </div>
+          <p>
+            This code will expire in 2 minutes. If you didn't request this code,
+            you can safely ignore this email.
+          </p>
+          <p>
+            Best regards,<br />
+            The Site Flow Team
+          </p>
+        </div>
+      </div>
+      <div class="footer">
+        <p>This is an automated message, please do not reply to this email.</p>
+        <p class="copyright">&copy; {{year}} Site Flow. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
