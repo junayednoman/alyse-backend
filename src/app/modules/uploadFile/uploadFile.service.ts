@@ -1,5 +1,5 @@
 import { AppError } from "../../classes/appError";
-import { deleteSingleFileFromS3 } from "../../utils/deleteSingleFileFromS3";
+import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import { uploadToS3 } from "../../utils/multerS3Uploader";
 
 const uploadFile = async (file: any) => {
@@ -9,6 +9,6 @@ const uploadFile = async (file: any) => {
 }
 
 const deleteFile = async (file_url: string) => {
-  await deleteSingleFileFromS3(file_url);
+  await deleteFileFromS3(file_url);
 }
 export const uploadFileService = { uploadFile, deleteFile };

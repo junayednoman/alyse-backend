@@ -4,12 +4,14 @@ import adminRouters from "../modules/admin/admin.routes";
 import { settingsRoutes } from "../modules/settings/settings.routes";
 import notificationRouters from "../modules/notification/notification.routes";
 import { uploadFileRoutes } from "../modules/uploadFile/uploadFile.routes";
+import districtRoutes from "../modules/district/district.routes";
 
 const router = Router();
 
 const apiRoutes = [
   { path: "/auth", route: authRouters },
   { path: "/admins", route: adminRouters },
+  { path: "/districts", route: districtRoutes },
   { path: "/settings", route: settingsRoutes },
   { path: "/notifications", route: notificationRouters },
   { path: "/upload-files", route: uploadFileRoutes },

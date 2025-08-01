@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { TAuth } from "./auth.interface";
+import { userRoles } from "../../constants/global.constant";
 
 const userSchema = new Schema<TAuth>(
   {
@@ -9,20 +10,15 @@ const userSchema = new Schema<TAuth>(
       trim: true,
       lowercase: true,
     },
-    user_type: {
-      type: String,
-      enum: ["Employee", "CompanyAdmin", "Admin"],
-      required: true,
-    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      refPath: "user_type",
+      refPath: "role",
       required: true,
     },
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["employee", "company_admin", "admin"],
+      enum: [userRoles.admin, userRoles.principal, userRoles.school],
       required: true,
     },
     is_account_verified: { type: Boolean, default: undefined },

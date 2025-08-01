@@ -19,7 +19,7 @@ const s3 = new S3Client({
  * @param fileKey - The key of the file to delete (e.g., "folder/image.jpg").
  * @throws Will throw an error if the deletion fails.
  */
-export const deleteSingleFileFromS3 = async (
+export const deleteFileFromS3 = async (
   fileLocation: string
 ): Promise<void> => {
   const fileKey = fileLocation.split(".amazonaws.com/")[1];

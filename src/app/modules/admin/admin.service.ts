@@ -1,4 +1,4 @@
-import { deleteSingleFileFromS3 } from "../../utils/deleteSingleFileFromS3";
+import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import { TAdmin } from "./admin.interface";
 import Admin from "./admin.model";
 
@@ -16,7 +16,7 @@ const updateAdminProfileImage = async (email: string, image: Partial<TAdmin>) =>
   const admin = await Admin.findOne({ email });
   const result = await Admin.findOneAndUpdate({ email }, { image }, { new: true });
   if (result) {
-    if (admin?.image) deleteSingleFileFromS3(admin?.image.split(".com/")[1]);
+    if (admin?.image) deleteFileFromS3(admin?.image.split(".com/")[1]);
   }
   return result;
 };
