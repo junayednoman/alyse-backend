@@ -3,9 +3,9 @@ import { TSettings } from './settings.interface'
 
 const settingsSchema = new Schema<TSettings>(
   {
-    terms_conditions: { type: String, required: true },
-    about_us: { type: String, required: true },
-    privacy_policy: { type: String, required: true },
+    termsConditions: { type: String, required: true },
+    aboutUs: { type: String, required: true },
+    privacyPolicy: { type: String, required: true },
   },
   { timestamps: true },
 )

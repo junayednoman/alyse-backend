@@ -7,11 +7,12 @@ export type TAuth = {
   password: string;
   user: ObjectId
   role: TUserRole;
-  is_account_verified: boolean;
+  isAccountVerified: boolean;
   otp?: string;
-  otp_expires?: Date;
-  otp_attempts: number;
-  is_otp_verified: boolean;
-  is_deleted: boolean;
-  is_blocked: boolean;
+  otpExpires?: Date;
+  otpAttempts: number;
+  isOtpVerified: boolean;
+  needsPasswordChange: boolean;
+  isDeleted: boolean;
+  isBlocked: boolean;
 };

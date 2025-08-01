@@ -34,12 +34,12 @@ const getAllNotifications = async (query: Record<string, any>, id: string) => {
 }
 
 const markAllAsRead = async (id: string) => {
-  const result = await Notification.updateMany({ has_read: false, receiver: id }, { has_read: true });
+  const result = await Notification.updateMany({ hasRead: false, receiver: id }, { hasRead: true });
   return result;
 }
 
 const getUnreadNotificationCount = async (id: string) => {
-  const result = await Notification.countDocuments({ has_read: false, receiver: id });
+  const result = await Notification.countDocuments({ hasRead: false, receiver: id });
   return result;
 }
 

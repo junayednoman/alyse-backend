@@ -6,8 +6,8 @@ const isUserExist = async (email: string) => {
   // check if user exists
   const user = await Auth.findOne({
     email,
-    is_deleted: false,
-    is_blocked: false,
+    isDeleted: false,
+    isBlocked: false,
   });
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, "Could not find user", "email");

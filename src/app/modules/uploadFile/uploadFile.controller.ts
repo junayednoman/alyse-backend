@@ -12,8 +12,8 @@ const uploadFile = handleAsyncRequest(async (req: any, res) => {
 });
 
 const deleteFile = handleAsyncRequest(async (req: any, res) => {
-  const file_url = req.body.file_url;
-  const result = await uploadFileService.deleteFile(file_url);
+  const fileUrl = req.body.fileUrl;
+  const result = await uploadFileService.deleteFile(fileUrl);
   successResponse(res, {
     message: "File deleted successfully!",
     data: result,

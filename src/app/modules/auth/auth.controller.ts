@@ -12,7 +12,7 @@ const loginUser = handleAsyncRequest(async (req, res) => {
   const cookieOptions: any = {
     httpOnly: true,
     secure: config.node_env === 'production', // Use secure in production
-    maxAge: payload.is_remember ? 60 * day : 20 * day,
+    maxAge: payload.isRemember ? 60 * day : 20 * day,
   };
 
   if (config.node_env === 'production') cookieOptions.sameSite = 'none';

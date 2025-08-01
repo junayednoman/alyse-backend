@@ -29,7 +29,7 @@ export const verifyOtpSchema = z.object({
     .toLowerCase()
     .nonempty("Email is required"),
   otp: z.string().nonempty("OTP is required"),
-  verify_email: z.boolean().optional(),
+  verifyAccount: z.boolean().optional(),
 });
 
 export const resetForgottenPasswordSchema = z.object({
@@ -43,6 +43,6 @@ export const resetForgottenPasswordSchema = z.object({
 });
 
 export const changePasswordValidationSchema = z.object({
-  old_password: z.string().nonempty("Old Password is required"),
-  new_password: z.string().nonempty("New Password is required"),
+  oldPassword: z.string().nonempty("Old Password is required"),
+  newPassword: z.string().nonempty("New Password is required"),
 });

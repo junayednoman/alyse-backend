@@ -17,10 +17,11 @@ const authVerify = (allowedRoles: string[]) =>
 
 
       const decoded = verifyJWT(token);
+      
       const user = await Auth.findOne({
         email: decoded.email,
-        is_deleted: false,
-        is_blocked: false,
+        isDeleted: false,
+        isBlocked: false,
       });
 
       if (!user) {

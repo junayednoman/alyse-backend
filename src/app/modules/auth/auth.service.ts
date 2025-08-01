@@ -9,10 +9,12 @@ import { sendEmail } from "../../utils/sendEmail";
 import isUserExist from "../../utils/isUserExist";
 import fs from "fs";
 
-const loginUser = async (payload: { email: string; password: string, is_remember: boolean }) => {
+const loginUser = async (payload: { email: string; password: string, isRemember: boolean }) => {
   const user = await isUserExist(payload.email);
 
-  if (!user.is_account_verified) throw new AppError(400, "Please, verify your account before logging in!");
+  if (!user.isAccountVerified) throw new AppError(400, "Please, verify your account before logging in!");
+
+  if (user.needsPasswordChange) throw new AppError(400, "Please, change your password before logging in!");
 
   // Compare the password
   const isPasswordMatch = await bcrypt.compare(payload.password, user.password);
@@ -36,7 +38,7 @@ const loginUser = async (payload: { email: string; password: string, is_remember
   });
 
   const refreshToken = jsonwebtoken.sign(jwtPayload, config.jwt_refresh_secret as string, {
-    expiresIn: payload?.is_remember ? "60d" : "20d",
+    expiresIn: payload?.isRemember ? "60d" : "20d",
   });
   return { accessToken, refreshToken, role: user.role };
 };
@@ -50,7 +52,7 @@ const sendOtp = async (payload: { email: string }) => {
     otp.toString(),
     Number(config.salt_rounds)
   );
-  const otp_expires = new Date(Date.now() + 3 * 60 * 1000);
+  const otpExpires = new Date(Date.now() + 3 * 60 * 1000);
   const subject = `Your OTP Code is Here - Site FLow`;
   const year = new Date().getFullYear().toString();
   const emailTemplatePath = "./src/app/emailTemplates/otp.html";
@@ -65,7 +67,7 @@ const sendOtp = async (payload: { email: string }) => {
 
   await Auth.findByIdAndUpdate(
     user._id,
-    { otp: hashedOtp, otp_expires, otp_attempts: 0 },
+    { otp: hashedOtp, otpExpires, otpAttempts: 0 },
     { new: true }
   );
   return { otp };
@@ -74,16 +76,16 @@ const sendOtp = async (payload: { email: string }) => {
 const verifyOtp = async (payload: {
   email: string;
   otp: string;
-  verify_account?: boolean;
+  verifyAccount?: boolean;
 }) => {
   const user = await isUserExist(payload.email);
 
   // check OTP attempts
-  if (user.otp_attempts! > 3) {
+  if (user.otpAttempts! > 3) {
     throw new AppError(StatusCodes.BAD_REQUEST, "OTP attempts exceeded", "otp");
   }
 
-  user.otp_attempts = user.otp_attempts ? user.otp_attempts! + 1 : 1;
+  user.otpAttempts = user.otpAttempts ? user.otpAttempts! + 1 : 1;
   user.save();
 
   if (!user.otp) {
@@ -96,11 +98,11 @@ const verifyOtp = async (payload: {
     throw new AppError(StatusCodes.BAD_REQUEST, "Invalid OTP", "otp");
   }
 
-  if (user.otp_expires! < new Date()) {
+  if (user.otpExpires! < new Date()) {
     throw new AppError(StatusCodes.BAD_REQUEST, "OTP has expired", "otp");
   }
 
-  if (payload.verify_account) {
+  if (payload.verifyAccount) {
     const subject = `Your Email Has Been Successfully Verified - Site FLow`;
     const year = new Date().getFullYear().toString();
     const emailTemplatePath = "./src/app/emailTemplates/otpSuccess.html";
@@ -113,13 +115,13 @@ const verifyOtp = async (payload: {
     })
 
     return await Auth.findByIdAndUpdate(user._id, {
-      is_account_verified: true,
-      $unset: { otp: "", otp_expires: "", otp_attempts: "" },
+      isAccountVerified: true,
+      $unset: { otp: "", otpExpires: "", otpAttempts: "" },
     });
   }
   await Auth.findByIdAndUpdate(user._id, {
-    is_otp_verified: true,
-    $unset: { otp: "", otp_expires: "", otp_attempts: "" },
+    isOtpVerified: true,
+    $unset: { otp: "", otpExpires: "", otpAttempts: "" },
   });
 };
 
@@ -129,7 +131,7 @@ const resetForgottenPassword = async (payload: {
 }) => {
   const user = await isUserExist(payload.email);
 
-  if (!user.is_otp_verified) {
+  if (!user.isOtpVerified) {
     throw new AppError(StatusCodes.BAD_REQUEST, "OTP not verified", "otp");
   }
 
@@ -140,7 +142,8 @@ const resetForgottenPassword = async (payload: {
   );
   const newAuth = await Auth.findByIdAndUpdate(user._id, {
     password: hashedPassword,
-    $unset: { is_otp_verified: "" },
+    needsPasswordChange: false,
+    $unset: { isOtpVerified: "" },
   });
 
   if (newAuth) {
@@ -157,14 +160,14 @@ const resetForgottenPassword = async (payload: {
 };
 
 const changePassword = async (email: string, payload: {
-  old_password: string;
-  new_password: string;
+  oldPassword: string;
+  newPassword: string;
 }) => {
   const user = await isUserExist(email);
 
   // Compare the password
   const isPasswordMatch = await bcrypt.compare(
-    payload.old_password,
+    payload.oldPassword,
     user.password
   );
   if (!isPasswordMatch) {
@@ -177,7 +180,7 @@ const changePassword = async (email: string, payload: {
 
   // hash the new password and save the document
   const hashedPassword = await bcrypt.hash(
-    payload.new_password,
+    payload.newPassword,
     Number(config.salt_rounds)
   );
   await Auth.findByIdAndUpdate(user._id, { password: hashedPassword });
@@ -202,7 +205,7 @@ const changePassword = async (email: string, payload: {
 const getNewAccessToken = async (token: string) => {
   // verify token
   const decoded = jsonwebtoken.verify(token, config.jwt_refresh_secret as string) as JwtPayload
-  const user = await Auth.findOne({ email: decoded.email, is_deleted: false, is_blocked: false });
+  const user = await Auth.findOne({ email: decoded.email, isDeleted: false, isBlocked: false });
 
   if (!user) {
     throw new AppError(404, "User not found!")
@@ -222,7 +225,7 @@ const changeUserStatus = async (id: string) => {
   const user = await Auth.findById(id);
   if (!user) throw new AppError(400, "Invalid user id!");
 
-  return await Auth.findByIdAndUpdate(user._id, { is_blocked: user.is_blocked ? false : true }, { new: true });
+  return await Auth.findByIdAndUpdate(user._id, { isBlocked: user.isBlocked ? false : true }, { new: true });
 };
 
 const AuthServices = {

@@ -7,7 +7,7 @@ const notificationSchema = new mongoose.Schema<TNotificationPayload>({
   body: { type: String, required: true },
   image: { type: String, default: null },
   link: { type: String },
-  has_read: { type: Boolean, default: false }
+  hasRead: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const Notification = mongoose.model('Notification', notificationSchema);

@@ -12,8 +12,8 @@ const createAdmin = async () => {
     const admin = await Admin.findOne({ email });
     const auth = await Auth.findOne({
       email,
-      is_deleted: false,
-      is_blocked: false,
+      isDeleted: false,
+      isBlocked: false,
     });
     if (admin && auth) {
       return;
@@ -38,7 +38,7 @@ const createAdmin = async () => {
       role: "admin",
       user_type: "Admin",
       user: newAdmin[0]?._id,
-      is_account_verified: true
+      isAccountVerified: true
     }
     await Auth.create(
       [authData],

@@ -1,5 +1,5 @@
 export type TSettings = {
-  terms_conditions: string // Required string
-  about_us: string // Required string
-  privacy_policy: string // Required string
+  termsConditions: string // Required string
+  aboutUs: string // Required string
+  privacyPolicy: string // Required string
 }

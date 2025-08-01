@@ -7,6 +7,7 @@ import { uploadFileRoutes } from "../modules/uploadFile/uploadFile.routes";
 import districtRoutes from "../modules/district/district.routes";
 import schoolRoutes from "../modules/school/school.routes";
 import categoryRoutes from "../modules/category/category.routes";
+import principalRoutes from "../modules/principal/principal.routes";
 
 const router = Router();
 
@@ -16,6 +17,7 @@ const apiRoutes = [
   { path: "/districts", route: districtRoutes },
   { path: "/schools", route: schoolRoutes },
   { path: "/categories", route: categoryRoutes },
+  { path: "/principals", route: principalRoutes },
 
 
 

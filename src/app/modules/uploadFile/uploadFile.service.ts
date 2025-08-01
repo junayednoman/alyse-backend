@@ -8,7 +8,7 @@ const uploadFile = async (file: any) => {
   return { url };
 }
 
-const deleteFile = async (file_url: string) => {
-  await deleteFileFromS3(file_url);
+const deleteFile = async (fileUrl: string) => {
+  await deleteFileFromS3(fileUrl);
 }
 export const uploadFileService = { uploadFile, deleteFile };

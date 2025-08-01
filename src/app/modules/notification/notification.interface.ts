@@ -6,5 +6,5 @@ export type TNotificationPayload = {
   body: string;
   image?: string;
   link?: string;
-  has_read?: boolean;
+  hasRead?: boolean;
 };
