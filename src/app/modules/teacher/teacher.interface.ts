@@ -1,11 +1,10 @@
 import { ObjectId } from "mongoose";
 
-export type TPrincipal = {
-  _id?: string; // Optional, as Mongoose generates it
+export type TTeacher = {
   name: string;
   email: string;
-  phone: string;
+  roomNumber: string;
+  school: ObjectId;
+  district: ObjectId;
   image?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 };

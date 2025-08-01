@@ -1,18 +1,20 @@
 import mongoose, { Schema, Types } from "mongoose";
-import { TPrincipal } from "./principal.interface";
+import { TTeacher } from "./teacher.interface";
 
-const PrincipalSchema = new Schema<TPrincipal>(
+const TeacherSchema = new Schema<TTeacher>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true },
-    phone: { type: String, required: true },
+    roomNumber: { type: String, required: true },
+    school: { type: Types.ObjectId, ref: "School", required: true },
+    district: { type: Types.ObjectId, ref: "District", required: true },
     image: { type: String },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 
-export const Principal = mongoose.model<TPrincipal>("Principal", PrincipalSchema);
+export const Teacher = mongoose.model<TTeacher>("Teacher", TeacherSchema);
 
-export default Principal;
+export default Teacher;
