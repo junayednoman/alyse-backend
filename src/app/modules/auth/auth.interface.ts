@@ -1,6 +1,6 @@
 import { ObjectId } from "mongoose";
 
-export type TUserRole = "admin" | "principal" | "school";
+export type TUserRole = "admin" | "principal" | "teacher";
 
 export type TAuth = {
   email: string;

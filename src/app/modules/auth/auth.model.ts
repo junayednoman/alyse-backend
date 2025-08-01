@@ -18,7 +18,7 @@ const userSchema = new Schema<TAuth>(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: [userRoles.admin, userRoles.principal, userRoles.school],
+      enum: [userRoles.admin, userRoles.principal, userRoles.teacher],
       required: true,
     },
     is_account_verified: { type: Boolean, default: undefined },

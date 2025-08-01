@@ -6,6 +6,7 @@ import notificationRouters from "../modules/notification/notification.routes";
 import { uploadFileRoutes } from "../modules/uploadFile/uploadFile.routes";
 import districtRoutes from "../modules/district/district.routes";
 import schoolRoutes from "../modules/school/school.routes";
+import categoryRoutes from "../modules/category/category.routes";
 
 const router = Router();
 
@@ -14,6 +15,10 @@ const apiRoutes = [
   { path: "/admins", route: adminRouters },
   { path: "/districts", route: districtRoutes },
   { path: "/schools", route: schoolRoutes },
+  { path: "/categories", route: categoryRoutes },
+
+
+
 
   { path: "/settings", route: settingsRoutes },
   { path: "/notifications", route: notificationRouters },

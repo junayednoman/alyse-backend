@@ -2,41 +2,35 @@ import { Router } from "express";
 import { userRoles } from "../../constants/global.constant";
 import authVerify from "../../middlewares/authVerify";
 import { handleZodValidation } from "../../middlewares/handleZodValidation";
-import { SchoolValidationSchema } from "./school.validation";
-import schoolController from "./school.controller";
+import { CategoryValidationSchema } from "./category.validation";
+import categoryController from "./category.controller";
 
 const router = Router();
 
 router.post(
   "/",
   authVerify([userRoles.admin]),
-  handleZodValidation(SchoolValidationSchema),
-  schoolController.createSchool
+  handleZodValidation(CategoryValidationSchema),
+  categoryController.createCategory
 );
 
 router.get(
   "/",
-  authVerify([userRoles.admin]),
-  schoolController.getAllSchools
-);
-
-router.get(
-  "/:id",
-  authVerify([userRoles.admin]),
-  schoolController.getSchoolById
+  authVerify([userRoles.admin, userRoles.teacher]),
+  categoryController.getAllCategories
 );
 
 router.put(
   "/:id",
   authVerify([userRoles.admin]),
-  handleZodValidation(SchoolValidationSchema.partial()),
-  schoolController.updateSchool
+  handleZodValidation(CategoryValidationSchema),
+  categoryController.updateCategory
 );
 
 router.delete(
   "/:id",
   authVerify([userRoles.admin]),
-  schoolController.deleteSchool
+  categoryController.deleteCategory
 );
 
 export default router;
