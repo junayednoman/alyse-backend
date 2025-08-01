@@ -5,6 +5,7 @@ import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import { TFile, uploadToS3 } from "../../utils/multerS3Uploader";
 import { TDistrict } from "./district.interface";
 import { District } from "./district.model";
+import School from "../school/school.model";
 
 const createDistrict = async (payload: TDistrict, file: TFile) => {
   const logo = await uploadToS3(file)
@@ -59,8 +60,10 @@ const deleteDistrict = async (id: string) => {
   }
 
   // check if any school is assigned to this district
-  return
-
+  const associatedSchools = await School.findOne({ district: id })
+  if (associatedSchools) {
+    throw new AppError(400, "One or more schools are assigned to this district!");
+  }
   const result = await District.findByIdAndDelete(district._id);
   if (result) await deleteFileFromS3(result?.logo)
   return result;
