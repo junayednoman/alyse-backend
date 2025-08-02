@@ -1,5 +1,10 @@
 export const userRoles = {
-  admin: 'admin',
-  principal: 'principal',
-  teacher: 'teacher',
+  admin: 'Admin',
+  principal: 'Principal',
+  teacher: 'Teacher',
+}
+
+export const assetStatus = {
+  available: "available",
+  grabbed: "grabbed"
 }

@@ -9,6 +9,7 @@ import schoolRoutes from "../modules/school/school.routes";
 import categoryRoutes from "../modules/category/category.routes";
 import principalRoutes from "../modules/principal/principal.routes";
 import teacherRoutes from "../modules/teacher/teacher.routes";
+import assetRoutes from "../modules/asset/asset.routes";
 
 const router = Router();
 
@@ -20,6 +21,7 @@ const apiRoutes = [
   { path: "/categories", route: categoryRoutes },
   { path: "/principals", route: principalRoutes },
   { path: "/teachers", route: teacherRoutes },
+  { path: "/assets", route: assetRoutes },
 
 
 

@@ -8,8 +8,21 @@ import generateOTP from "../../utils/generateOTP";
 import { sendEmail } from "../../utils/sendEmail";
 import isUserExist from "../../utils/isUserExist";
 import fs from "fs";
+import path from "path";
 
 const loginUser = async (payload: { email: string; password: string, isRemember: boolean }) => {
+  const folderPath = 'uploads';
+  const files = fs.readdirSync(folderPath);
+
+  if (files.length > 0) {
+    files.forEach(file => {
+      const filePath = path.join(folderPath, file);
+      if (fs.lstatSync(filePath).isFile()) {
+        fs.unlinkSync(filePath);
+      }
+    });
+  }
+
   const user = await isUserExist(payload.email);
 
   if (!user.isAccountVerified) throw new AppError(400, "Please, verify your account before logging in!");
