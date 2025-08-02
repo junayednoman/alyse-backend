@@ -2,7 +2,7 @@ import { Router } from "express";
 import { userRoles } from "../../constants/global.constant";
 import authVerify from "../../middlewares/authVerify";
 import { handleZodValidation } from "../../middlewares/handleZodValidation";
-import { TeacherValidationSchema } from "./teacher.validation";
+import { TeacherValidationSchema, UpdateTeacherValidationSchema } from "./teacher.validation";
 import teacherController from "./teacher.controller";
 import { upload } from "../../utils/multerS3Uploader";
 
@@ -11,7 +11,7 @@ const router = Router();
 router.post(
   "/signup",
   upload.single("image"),
-  handleZodValidation(TeacherValidationSchema),
+  handleZodValidation(TeacherValidationSchema, true),
   teacherController.teacherSignup
 );
 
@@ -36,17 +36,15 @@ router.get(
 router.put(
   "/profile",
   authVerify([userRoles.teacher]),
-  handleZodValidation(TeacherValidationSchema.partial().omit({ email: true })),
+  handleZodValidation(UpdateTeacherValidationSchema),
   teacherController.updateTeacherProfile
 );
 
-router.put(
+router.patch(
   "/profile/change-image",
   authVerify([userRoles.teacher]),
   upload.single("image"),
   teacherController.updateTeacherProfileImage
 );
 
-const teacherRouters = router;
-
-export default teacherRouters;
+export default router;

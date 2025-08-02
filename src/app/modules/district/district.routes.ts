@@ -10,7 +10,7 @@ const router = Router();
 
 router.post("/", authVerify([userRoles.admin]), upload.single("logo"), handleZodValidation(DistrictValidationSchema, true), districtController.createDistrict)
 
-router.get("/", authVerify([userRoles.admin]), districtController.getDistricts)
+router.get("/", authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]), districtController.getDistricts)
 
 router.put("/:id", authVerify([userRoles.admin]), upload.single("logo"), handleZodValidation(updateDistrictValidationSchema, true), districtController.updateDistrict)
 

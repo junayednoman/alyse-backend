@@ -13,6 +13,8 @@ import Auth from "../auth/auth.model";
 import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import fs from "fs";
 import { sendEmail } from "../../utils/sendEmail";
+import { District } from "../district/district.model";
+import School from "../school/school.model";
 
 const teacherSignup = async ({ password, ...payload }: TTeacher & { password: string }, file?: any) => {
   const auth = await Auth.findOne({ email: payload.email, isAccountVerified: true });
@@ -25,10 +27,16 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
   session.startTransaction();
 
   try {
-    const district = await Teacher.findById(payload.district).session(session);
+    const district = await District.findById(payload.district)
     if (!district) {
       deleteLocalFile(file?.filename)
-      throw new AppError(400, "Invalid district ID!");
+      throw new AppError(400, "Invalid district IDddd!");
+    }
+
+    const school = await School.findById(payload.school)
+    if (!school) {
+      deleteLocalFile(file?.filename)
+      throw new AppError(400, "Invalid school ID!");
     }
 
     if (file) {
@@ -129,10 +137,22 @@ const getTeacherProfile = async (email: string) => {
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const updateTeacherProfile = async (userEmail: string, { email, ...payload }: Partial<TTeacher>) => {
-  const teacher = await Teacher.findOne({ userEmail });
-  if (!teacher) throw new AppError(400, "Invalid teacher ID!");
+  const teacher = await Teacher.findOne({ email: userEmail });
+  if (payload.district) {
+    const school = await School.findById(payload.school);
+    if (!school) {
+      throw new AppError(400, "Invalid school ID!");
+    }
+  }
 
-  const updated = await Teacher.findByIdAndUpdate(teacher._id, payload, { new: true });
+  if (payload.school) {
+    const district = await District.findById(payload.district);
+    if (!district) {
+      throw new AppError(400, "Invalid district ID!");
+    }
+  }
+
+  const updated = await Teacher.findByIdAndUpdate(teacher?._id, payload, { new: true });
   return updated;
 };
 

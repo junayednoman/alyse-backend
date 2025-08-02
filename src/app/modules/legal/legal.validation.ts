@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const updateSettingsSchema = z.object({
+export const updateLegalSchema = z.object({
   termsConditions: z
     .string()
     .nonempty('Terms and conditions are required')

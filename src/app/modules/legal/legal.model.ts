@@ -1,7 +1,7 @@
 import { model, Schema } from 'mongoose'
-import { TSettings } from './settings.interface'
+import { TLegal } from './legal.interface'
 
-const settingsSchema = new Schema<TSettings>(
+const legalSchema = new Schema<TLegal>(
   {
     termsConditions: { type: String, required: true },
     aboutUs: { type: String, required: true },
@@ -10,5 +10,5 @@ const settingsSchema = new Schema<TSettings>(
   { timestamps: true },
 )
 
-const Settings = model<TSettings>('Settings', settingsSchema)
-export default Settings
+const Legal = model<TLegal>('Legal', legalSchema)
+export default Legal
