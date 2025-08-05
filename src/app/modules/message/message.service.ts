@@ -55,6 +55,13 @@ const updateMessage = async (id: string, userId: string, payload: Partial<TMessa
   return updated;
 };
 
+const markMessagesAsSeen = async (chatId: string, userId: string) => {
+  const chat = await Chat.findById(chatId);
+  if (!chat) throw new AppError(400, "Invalid chat ID!");
+  const updatedMessages = await Message.updateMany({ chat: chatId, isSeen: false, sender: { $ne: userId } }, { isSeen: true });
+  return updatedMessages;
+};
+
 const deleteMessage = async (id: string, userId: string) => {
   const message = await Message.findById(id);
   if (!message) throw new AppError(400, "Invalid message ID!");
@@ -72,5 +79,6 @@ export default {
   createMessage,
   getMessagesByChatId,
   updateMessage,
+  markMessagesAsSeen,
   deleteMessage,
 };

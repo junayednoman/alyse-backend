@@ -27,6 +27,8 @@ router.put(
   messageController.updateMessage
 );
 
+router.patch("/seen/:chatId", authVerify([userRoles.teacher]), messageController.markMessagesAsSeen);
+
 router.delete(
   "/:id",
   authVerify([userRoles.teacher]),
