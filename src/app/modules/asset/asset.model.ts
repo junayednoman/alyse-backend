@@ -15,6 +15,7 @@ const AssetSchema = new Schema<TAsset>(
     grabbedBy: { type: Types.ObjectId, ref: "Auth" },
     isDeleted: { type: Boolean, default: false },
     district: { type: Types.ObjectId, ref: "District", required: true },
+    isApproved: { type: Boolean, default: false },
   },
   {
     timestamps: true,

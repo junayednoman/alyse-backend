@@ -10,6 +10,8 @@ import categoryRoutes from "../modules/category/category.routes";
 import principalRoutes from "../modules/principal/principal.routes";
 import teacherRoutes from "../modules/teacher/teacher.routes";
 import assetRoutes from "../modules/asset/asset.routes";
+import chatRoutes from "../modules/chat/chat.routes";
+import messageRoutes from "../modules/message/message.routes";
 
 const router = Router();
 
@@ -22,7 +24,8 @@ const apiRoutes = [
   { path: "/principals", route: principalRoutes },
   { path: "/teachers", route: teacherRoutes },
   { path: "/assets", route: assetRoutes },
-
+  { path: "/chats", route: chatRoutes },
+  { path: "/messages", route: messageRoutes },
 
 
 

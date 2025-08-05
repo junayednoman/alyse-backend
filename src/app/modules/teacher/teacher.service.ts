@@ -30,7 +30,7 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
     const district = await District.findById(payload.district)
     if (!district) {
       deleteLocalFile(file?.filename)
-      throw new AppError(400, "Invalid district IDddd!");
+      throw new AppError(400, "Invalid district ID!");
     }
 
     const school = await School.findById(payload.school)
@@ -85,7 +85,6 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
         sendEmail(payload.email, subject, emailContent);
       })
     }
-
 
     await session.commitTransaction();
     return teacher[0];

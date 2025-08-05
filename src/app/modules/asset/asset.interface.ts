@@ -10,6 +10,7 @@ export type TAsset = {
   teacher: ObjectId;
   status: "available" | "grabbed";
   grabbedBy: ObjectId
+  isApproved: boolean
   isDeleted: boolean
   district: ObjectId
 };

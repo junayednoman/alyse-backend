@@ -9,13 +9,18 @@ import Auth from "../auth/auth.model";
 import Category from "../category/category.model";
 import deleteLocalFile from "../../utils/deleteLocalFile";
 import { assetStatus } from "../../constants/global.constant";
+import { District } from "../district/district.model";
 
 const createAsset = async (userId: string, payload: TAsset, files: any[]) => {
   const session = await startSession();
 
   const teacher = await Auth.findById(userId).populate("user");
   payload.teacher = teacher?._id as unknown as ObjectId;
+
+  const teacherDistrict = await District.findById((teacher?.user as any)?.district);
+  if (teacherDistrict?.type === "non-strict") payload.isApproved = true;
   payload.district = (teacher?.user as any)?.district as unknown as ObjectId;
+
   const category = await Category.findById(payload.category);
   if (!category) {
     files.map(file => deleteLocalFile(file.filename))
@@ -24,6 +29,7 @@ const createAsset = async (userId: string, payload: TAsset, files: any[]) => {
 
   const imageUrls = await uploadMultipleToS3(files)
   payload.images = imageUrls
+
   try {
     session.startTransaction();
     const asset = await Asset.create([payload], { session });
