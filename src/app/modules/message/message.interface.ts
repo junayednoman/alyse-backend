@@ -4,6 +4,6 @@ export type TMessage = {
   chat: ObjectId;
   text: string;
   file?: string;
-  isSeen: boolean;
+  isSeen?: boolean;
   sender: ObjectId;
 };

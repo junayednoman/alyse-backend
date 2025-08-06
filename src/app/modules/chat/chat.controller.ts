@@ -12,7 +12,7 @@ const createChat = handleAsyncRequest(async (req: any, res) => {
 });
 
 const getMyChats = handleAsyncRequest(async (req: any, res) => {
-  const result = await chatService.getMyChats(req.user.id);
+  const result = await chatService.getMyChats(req.user.id, req.query.limit);
   successResponse(res, {
     message: "My chats retrieved successfully!",
     data: result,

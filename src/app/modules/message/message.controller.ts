@@ -3,7 +3,9 @@ import { successResponse } from "../../utils/successResponse";
 import messageService from "./message.service";
 
 const createMessage = handleAsyncRequest(async (req: any, res) => {
-  const result = await messageService.createMessage(req.user.id, req.body);
+  const payload = req.body;
+  payload.sender = req.user.id;
+  const result = await messageService.createMessage(payload);
   successResponse(res, {
     message: "Message created successfully!",
     data: result,

@@ -2,18 +2,17 @@ import Message from "./message.model";
 import { AppError } from "../../classes/appError";
 import { TMessage } from "./message.interface";
 import QueryBuilder from "../../classes/queryBuilder";
-import { ObjectId, startSession } from "mongoose";
+import { startSession } from "mongoose";
 import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import Chat from "../chat/chat.model";
 import Asset from "../asset/asset.model";
 
-const createMessage = async (userId: ObjectId, payload: TMessage,) => {
-  const chat = await Chat.findById(payload.chat);
-  if (!payload.chat || !chat) throw new AppError(400, "Invalid chat ID!");
-  payload.sender = userId;
+const createMessage = async (payload: TMessage,) => {
   const session = await startSession();
   try {
     session.startTransaction();
+    const chat = await Chat.findById(payload.chat);
+    if (!payload.chat || !chat) throw new AppError(400, "Invalid chat ID!");
     const message = await Message.create([payload], { session });
     await Chat.findByIdAndUpdate(payload.chat, { lastMessage: message[0]._id }, { session });
     await session.commitTransaction();
