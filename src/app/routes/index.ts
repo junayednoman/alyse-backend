@@ -12,6 +12,7 @@ import teacherRoutes from "../modules/teacher/teacher.routes";
 import assetRoutes from "../modules/asset/asset.routes";
 import chatRoutes from "../modules/chat/chat.routes";
 import messageRoutes from "../modules/message/message.routes";
+import summaryRouters from "../modules/summary/summary.routes";
 
 const router = Router();
 
@@ -26,12 +27,10 @@ const apiRoutes = [
   { path: "/assets", route: assetRoutes },
   { path: "/chats", route: chatRoutes },
   { path: "/messages", route: messageRoutes },
-
-
-
   { path: "/legal", route: legalRoutes },
   { path: "/notifications", route: notificationRouters },
   { path: "/upload-files", route: uploadFileRoutes },
+  { path: "/summary", route: summaryRouters },
 ];
 
 apiRoutes.forEach((route) => {
