@@ -5,7 +5,6 @@ import Auth from "../auth/auth.model"
 import Teacher from "../teacher/teacher.model";
 import { startOfYear, endOfYear } from "date-fns";
 
-
 const getDashboardSummary = async (userId: string, year: number) => {
   const user = await Auth.findById(userId).populate("user");
   const availableAssetQuery = { status: assetStatus.available } as Record<string, any>

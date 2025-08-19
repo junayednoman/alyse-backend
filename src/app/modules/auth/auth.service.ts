@@ -66,7 +66,7 @@ const sendOtp = async (payload: { email: string }) => {
     Number(config.salt_rounds)
   );
   const otpExpires = new Date(Date.now() + 3 * 60 * 1000);
-  const subject = `Your OTP Code is Here - Site FLow`;
+  const subject = `Your OTP Code is Here - D.A.M`;
   const year = new Date().getFullYear().toString();
   const emailTemplatePath = "./src/app/emailTemplates/otp.html";
   fs.readFile(emailTemplatePath, "utf8", (err, data) => {
@@ -116,7 +116,7 @@ const verifyOtp = async (payload: {
   }
 
   if (payload.verifyAccount) {
-    const subject = `Your Email Has Been Successfully Verified - Site FLow`;
+    const subject = `Your Email Has Been Successfully Verified - D.A.M`;
     const year = new Date().getFullYear().toString();
     const emailTemplatePath = "./src/app/emailTemplates/otpSuccess.html";
     fs.readFile(emailTemplatePath, "utf8", (err, data) => {
@@ -160,7 +160,7 @@ const resetForgottenPassword = async (payload: {
   });
 
   if (newAuth) {
-    const subject = `Your Password Has Been Successfully Reset - Site FLow`;
+    const subject = `Your Password Has Been Successfully Reset - D.A.M`;
     const year = new Date().getFullYear().toString();
     const emailTemplatePath = "./src/app/emailTemplates/passwordResetSuccess.html";
     fs.readFile(emailTemplatePath, "utf8", (err, data) => {

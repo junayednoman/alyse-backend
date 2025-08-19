@@ -44,7 +44,9 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
       payload.image = image
     }
 
-    const teacher = await Teacher.create([payload], { session });
+    const teacher = await Teacher.findOneAndUpdate({ email: payload.email }, payload, { upsert: true, new: true });
+
+    // hash password
     const hashedPassword = await bcrypt.hash(
       password,
       Number(config.salt_rounds)
@@ -57,19 +59,19 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
       Number(config.salt_rounds)
     );
 
-    const otp_expires = new Date(Date.now() + 3 * 60 * 1000);
+    const otpExpires = new Date(Date.now() + 3 * 60 * 1000);
 
     const authData = {
       email: payload.email,
       password: hashedPassword,
-      user: teacher[0]?._id,
+      user: teacher?._id,
       role: userRoles.teacher,
       otp: hashedOtp,
-      otp_expires,
-      otp_attempts: 0,
+      otpExpires,
+      otpAttempts: 0,
     }
 
-    await Auth.create([authData], { session });
+    await Auth.findOneAndUpdate({ email: payload.email }, authData, { upsert: true });
 
     if (teacher) {
       // send otp
@@ -87,7 +89,7 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
     }
 
     await session.commitTransaction();
-    return teacher[0];
+    return teacher;
   } catch (error: any) {
     await session.abortTransaction();
     if (payload.image) await deleteFileFromS3(payload.image)
