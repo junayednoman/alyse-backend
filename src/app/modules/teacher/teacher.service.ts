@@ -15,6 +15,7 @@ import fs from "fs";
 import { sendEmail } from "../../utils/sendEmail";
 import { District } from "../district/district.model";
 import School from "../school/school.model";
+import Asset from "../asset/asset.model";
 
 const teacherSignup = async ({ password, ...payload }: TTeacher & { password: string }, file?: any) => {
   const auth = await Auth.findOne({ email: payload.email, isAccountVerified: true });
@@ -101,8 +102,9 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
 
 const getAllTeachers = async (query: Record<string, any>) => {
   const searchableFields = ["name", "email", "roomNumber"];
-
-  const teacherQuery = new QueryBuilder(Teacher.find(), query)
+  query.role = userRoles.teacher
+  query.fields = query.fields || "isBlocked user role"
+  const teacherQuery = new QueryBuilder(Auth.find(), query)
     .search(searchableFields)
     .filter()
     .sort()
@@ -110,9 +112,20 @@ const getAllTeachers = async (query: Record<string, any>) => {
     .selectFields();
 
   const meta = await teacherQuery.countTotal();
-  const result = await teacherQuery.queryModel.populate("school", "name").populate("district", "name");
+  const result = await teacherQuery.queryModel.populate([
+    {
+      path: "user",
+      populate: [{ path: "district", select: "name logo code type" }, { path: "school", select: "name" }],
+    }
+  ])
   return { data: result, meta };
 };
+
+const getSingleTeacher = async (id: string) => {
+  const teacher = await Auth.findById(id).select("isBlocked user role").populate("user");
+  const assets = await Asset.find({ teacher: id }).populate("category", "name");
+  return { teacher, assets };
+}
 
 const getTeachersByDistrictId = async (districtId: string, query: Record<string, any>) => {
   const searchableFields = ["name", "email", "roomNumber"];
@@ -177,4 +190,5 @@ export default {
   getTeacherProfile,
   updateTeacherProfile,
   updateTeacherProfileImage,
+  getSingleTeacher
 };

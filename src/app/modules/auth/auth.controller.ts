@@ -98,7 +98,7 @@ const changeUserStatus = handleAsyncRequest(async (req, res) => {
   const refreshToken = req?.cookies?.refreshToken;
   if (refreshToken) res.clearCookie('constructionRefreshToken');
   successResponse(res, {
-    message: "User account status changed successfully!",
+    message: `User account ${result?.isBlocked ? "blocked" : "unblocked"} successfully!`,
     data: result,
   });
 });

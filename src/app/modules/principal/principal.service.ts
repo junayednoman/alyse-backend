@@ -41,8 +41,9 @@ const addPrincipal = async (payload: TPrincipal) => {
 
 const getAllPrincipals = async (query: Record<string, any>) => {
   const searchableFields = ["name", "email", "phone", "image"];
-
-  const categoryQuery = new QueryBuilder(Principal.find(), query)
+  query.role = userRoles.principal
+  query.fields = query.fields || "isBlocked user role"
+  const categoryQuery = new QueryBuilder(Auth.find(), query)
     .search(searchableFields)
     .filter()
     .sort()
@@ -50,7 +51,9 @@ const getAllPrincipals = async (query: Record<string, any>) => {
     .selectFields();
 
   const meta = await categoryQuery.countTotal();
-  const result = await categoryQuery.queryModel;
+  const result = await categoryQuery.queryModel.populate([
+    { path: "user", populate: { path: "district", select: "name logo code type" } }
+  ]);
   return { data: result, meta };
 };
 
@@ -89,15 +92,6 @@ const updatePrincipalImage = async (email: string, file: TFile) => {
   return updated;
 };
 
-const changePrincipalStatus = async (id: string) => {
-  const principal = await Principal.findById(id);
-  const auth = await Auth.findOne({ user: id });
-  if (!principal) throw new AppError(400, "Invalid principal ID!");
-
-  await Auth.findByIdAndUpdate(auth?._id, { isBlocked: auth?.isBlocked ? false : true }, { new: true });
-  return principal;
-};
-
 export default {
   addPrincipal,
   getAllPrincipals,
@@ -105,5 +99,4 @@ export default {
   getPrincipalById,
   updatePrincipalProfile,
   updatePrincipalImage,
-  changePrincipalStatus,
 };

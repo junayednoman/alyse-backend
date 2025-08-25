@@ -47,10 +47,4 @@ router.patch(
   principalController.updatePrincipalImage
 );
 
-router.patch(
-  "/:id",
-  authVerify([userRoles.admin]),
-  principalController.changePrincipalStatus
-);
-
 export default router;

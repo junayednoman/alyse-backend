@@ -5,6 +5,9 @@ export const userRoles = {
 }
 
 export const assetStatus = {
+  pending: "pending",
+  approved: "approved",
+  denied: "denied",
   available: "available",
   grabbed: "grabbed"
 }

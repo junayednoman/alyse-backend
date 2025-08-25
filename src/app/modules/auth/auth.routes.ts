@@ -20,7 +20,7 @@ authRouters.post(
 );
 authRouters.post(
   "/logout",
-  authVerify([userRoles.admin, userRoles.companyAdmin, userRoles.employee,]),
+  authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]),
   AuthController.logOut
 );
 authRouters.post(
@@ -40,7 +40,7 @@ authRouters.post(
 );
 authRouters.post(
   "/change-password",
-  authVerify([userRoles.admin, userRoles.companyAdmin, userRoles.employee,]),
+  authVerify([userRoles.admin, userRoles.principal, userRoles.teacher,]),
   handleZodValidation(changePasswordValidationSchema),
   AuthController.changePassword
 );

@@ -5,17 +5,17 @@ import { userRoles } from "../../constants/global.constant";
 
 const notificationRouters = Router();
 
-notificationRouters.post("/", authVerify([userRoles.admin, userRoles.companyAdmin, userRoles.employee]), notificationController.createNotification)
-notificationRouters.get("/", authVerify([userRoles.admin, userRoles.companyAdmin, userRoles.employee]), notificationController.getAllNotifications)
+notificationRouters.post("/", authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]), notificationController.createNotification)
+notificationRouters.get("/", authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]), notificationController.getAllNotifications)
 
 notificationRouters.patch(
-  "/mark-all-as-read", authVerify([userRoles.admin, userRoles.companyAdmin, userRoles.employee]),
+  "/mark-all-as-read", authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]),
   notificationController.markAllAsRead)
 
-notificationRouters.get("/unread-count", authVerify([userRoles.admin, userRoles.companyAdmin, userRoles.employee]), notificationController.getUnreadNotificationCount)
+notificationRouters.get("/unread-count", authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]), notificationController.getUnreadNotificationCount)
 
-notificationRouters.delete("/:id", authVerify([userRoles.admin, userRoles.companyAdmin, userRoles.employee]), notificationController.deleteSingleNotification)
+notificationRouters.delete("/:id", authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]), notificationController.deleteSingleNotification)
 
-notificationRouters.delete("/", authVerify([userRoles.admin, userRoles.companyAdmin, userRoles.employee]), notificationController.deleteMyNotifications)
+notificationRouters.delete("/", authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]), notificationController.deleteMyNotifications)
 
 export default notificationRouters;

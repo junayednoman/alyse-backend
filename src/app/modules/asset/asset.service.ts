@@ -8,7 +8,7 @@ import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import Auth from "../auth/auth.model";
 import Category from "../category/category.model";
 import deleteLocalFile from "../../utils/deleteLocalFile";
-import { assetStatus } from "../../constants/global.constant";
+import { assetStatus, userRoles } from "../../constants/global.constant";
 import { District } from "../district/district.model";
 
 const createAsset = async (userId: string, payload: TAsset, files: any[]) => {
@@ -18,7 +18,7 @@ const createAsset = async (userId: string, payload: TAsset, files: any[]) => {
   payload.teacher = teacher?._id as unknown as ObjectId;
 
   const teacherDistrict = await District.findById((teacher?.user as any)?.district);
-  if (teacherDistrict?.type === "non-strict") payload.isApproved = true;
+  if (teacherDistrict?.type === "non-strict") payload.status = "approved";
   payload.district = (teacher?.user as any)?.district as unknown as ObjectId;
 
   const category = await Category.findById(payload.category);
@@ -47,7 +47,10 @@ const createAsset = async (userId: string, payload: TAsset, files: any[]) => {
 const getAllAssets = async (userId: string, query: Record<string, any>) => {
   const searchableFields = ["name", "description", "material"];
   const auth = await Auth.findById(userId).populate("user")
-  query.district = ((auth?.user as any)?.district as unknown as ObjectId)
+  if (auth?.role !== userRoles.admin) query.district = ((auth?.user as any)?.district as unknown as ObjectId)
+
+  if (auth?.role == userRoles.teacher) query.status = assetStatus.approved;
+  if (auth?.role == userRoles.principal) query.status = assetStatus.pending;
   const assetQuery = new QueryBuilder(Asset.find(), query)
     .search(searchableFields)
     .filter()
@@ -58,6 +61,17 @@ const getAllAssets = async (userId: string, query: Record<string, any>) => {
   const meta = await assetQuery.countTotal();
   const result = await assetQuery.queryModel
   return { data: result, meta };
+};
+
+const getSingleAsset = async (id: string) => {
+  const asset = await Asset.findById(id).populate([
+    { path: "category", select: "name" },
+    {
+      path: "teacher", select: "user role",
+      populate: { path: "user" }
+    },
+  ]);
+  return asset;
 };
 
 const getMyPostedAssets = async (userId: string) => {
@@ -131,4 +145,5 @@ export default {
   updateAsset,
   deleteAssetImage,
   deleteAsset,
+  getSingleAsset
 };

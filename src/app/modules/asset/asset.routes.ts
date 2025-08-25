@@ -18,7 +18,7 @@ router.post(
 
 router.get(
   "/",
-  authVerify([userRoles.teacher, userRoles.principal]),
+  authVerify([userRoles.teacher, userRoles.principal, userRoles.admin]),
   assetController.getAllAssets
 );
 
@@ -32,6 +32,12 @@ router.get(
   "/my-grabbed",
   authVerify([userRoles.teacher]),
   assetController.getMyGrabbedAssets
+);
+
+router.get(
+  "/:id",
+  authVerify([userRoles.teacher, userRoles.principal, userRoles.admin]),
+  assetController.getSingleAsset
 );
 
 router.patch(

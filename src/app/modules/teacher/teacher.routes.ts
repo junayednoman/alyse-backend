@@ -17,13 +17,13 @@ router.post(
 
 router.get(
   "/",
-  authVerify([userRoles.admin]),
+  authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]),
   teacherController.getAllTeachers
 );
 
 router.get(
   "/district/:districtId",
-  authVerify([userRoles.admin, userRoles.principal]),
+  authVerify([userRoles.admin]),
   teacherController.getTeachersByDistrictId
 );
 
@@ -31,6 +31,12 @@ router.get(
   "/profile",
   authVerify([userRoles.teacher]),
   teacherController.getTeacherProfile
+);
+
+router.get(
+  "/:id",
+  authVerify([userRoles.admin, userRoles.principal]),
+  teacherController.getSingleTeacher
 );
 
 router.put(

@@ -51,20 +51,11 @@ const updatePrincipalImage = handleAsyncRequest(async (req: any, res) => {
   });
 });
 
-const changePrincipalStatus = handleAsyncRequest(async (req: any, res) => {
-  const result = await principalService.changePrincipalStatus(req.params.id);
-  successResponse(res, {
-    message: "Principal status changed successfully!",
-    data: result,
-  });
-});
-
 export default {
   addPrincipal,
   getAllPrincipals,
   getPrincipalProfile,
   getPrincipalById,
   updatePrincipalProfile,
-  updatePrincipalImage,
-  changePrincipalStatus,
+  updatePrincipalImage
 };

@@ -28,6 +28,14 @@ const getTeachersByDistrictId = handleAsyncRequest(async (req: any, res) => {
   });
 });
 
+const getSingleTeacher = handleAsyncRequest(async (req: any, res) => {
+  const result = await teacherService.getSingleTeacher(req.params.id);
+  successResponse(res, {
+    message: "Teacher retrieved successfully!",
+    data: result,
+  });
+});
+
 const getTeacherProfile = handleAsyncRequest(async (req: any, res) => {
   const result = await teacherService.getTeacherProfile(req.user.email);
   successResponse(res, {
@@ -59,4 +67,5 @@ export default {
   getTeacherProfile,
   updateTeacherProfile,
   updateTeacherProfileImage,
+  getSingleTeacher
 };
