@@ -10,6 +10,9 @@ import Category from "../category/category.model";
 import deleteLocalFile from "../../utils/deleteLocalFile";
 import { assetStatus, userRoles } from "../../constants/global.constant";
 import { District } from "../district/district.model";
+import fs from "fs";
+import { sendEmail } from "../../utils/sendEmail";
+import { format, parseISO } from "date-fns";
 
 const createAsset = async (userId: string, payload: TAsset, files: any[]) => {
   const session = await startSession();
@@ -60,6 +63,11 @@ const getAllAssets = async (userId: string, query: Record<string, any>) => {
 
   const meta = await assetQuery.countTotal();
   const result = await assetQuery.queryModel
+    .populate([
+      // { path: "category", select: "name" },
+      { path: "teacher", select: "user role", populate: { path: "user", select: "name image email" } },
+      // { path: "district", select: "name logo" }
+    ])
   return { data: result, meta };
 };
 
@@ -89,17 +97,47 @@ const getMyGrabbedAssets = async (userId: string) => {
 };
 
 const grabAsset = async (userId: string, id: string) => {
-  const asset = await Asset.findById(id);
+  const asset = await Asset.findById(id).populate([
+    { path: "teacher", select: "user role", populate: { path: "user", select: "name" } }
+  ]);
   if (!asset) throw new AppError(400, "Invalid asset ID!");
+  if (asset.status === assetStatus.grabbed) throw new AppError(400, "This asset is already grabbed!");
 
   const updated = await Asset.findByIdAndUpdate(id, { status: assetStatus.grabbed, grabbedBy: userId }, { new: true });
+  if (updated) {
+    const subject = `Your asset has been grabbed - D.A.M`;
+    const year = new Date().getFullYear().toString();
+    const emailTemplatePath = "./src/app/emailTemplates/assetGrabbed.html";
+
+    const parsedDate = parseISO((updated as any).updatedAt.toString());
+
+    // Format as "Aug 4, 2025"
+    const formattedDate = format(parsedDate, 'MMM d, yyyy');
+    const auth = await Auth.findById(userId).populate([
+      {
+        path: "user", select: "name", populate: {
+          path: "school", select: "name"
+        }
+      }
+    ]);
+    fs.readFile(emailTemplatePath, "utf8", (err, data) => {
+      if (err) throw new AppError(500, err.message || "Something went wrong");
+      const emailContent = data
+        .replace('{{owner_name}}', (asset.teacher as any).user.name)
+        .replace('{{year}}', year)
+        .replace('{{date_time}}', formattedDate)
+        .replace('{{claimer_name}}', (auth?.user as any).name)
+        .replace('{{claimer_school}}', (auth?.user as any).school.name)
+
+      sendEmail((asset.teacher as any).email, subject, emailContent);
+    })
+  }
   return updated;
 };
 
 const updateAsset = async (id: string, userId: string, payload: Partial<TAsset>, files?: any[]) => {
   const asset = await Asset.findById(id);
   if (!asset) throw new AppError(400, "Invalid asset ID!");
-  if (userId !== asset.teacher.toString()) throw new AppError(401, "Unauthorized! Only the teacher can update this asset.");
 
   if (payload.category) {
     const category = await Category.findById(payload.category);

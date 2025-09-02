@@ -122,7 +122,15 @@ const getAllTeachers = async (query: Record<string, any>) => {
 };
 
 const getSingleTeacher = async (id: string) => {
-  const teacher = await Auth.findById(id).select("isBlocked user role").populate("user");
+  const teacher = await Auth.findById(id).select("isBlocked user role").populate([
+    {
+      path: "user",
+      populate: [
+        { path: "school" },
+        { path: "district" }
+      ]
+    }
+  ]);
   const assets = await Asset.find({ teacher: id }).populate("category", "name");
   return { teacher, assets };
 }

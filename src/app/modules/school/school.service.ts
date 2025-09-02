@@ -3,6 +3,7 @@ import { AppError } from "../../classes/appError";
 import { TSchool } from "./school.interface";
 import { District } from "../district/district.model";
 import QueryBuilder from "../../classes/queryBuilder";
+import Teacher from "../teacher/teacher.model";
 
 const createSchool = async (payload: TSchool) => {
   const district = await District.findById(payload.district);
@@ -69,7 +70,9 @@ const deleteSchool = async (id: string) => {
   if (!existing) {
     throw new AppError(400, "Invalid school ID!");
   }
-  throw new AppError(400, "check if any asset is assigned to this school");
+
+  const teacher = await Teacher.findOne({ school: id });
+  if (teacher) throw new AppError(400, "School has teachers, cannot delete!");
   const deleted = await School.findByIdAndDelete(id);
   return deleted;
 };

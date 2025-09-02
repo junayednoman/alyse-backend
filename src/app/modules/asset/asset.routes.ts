@@ -48,7 +48,7 @@ router.patch(
 
 router.put(
   "/:id",
-  authVerify([userRoles.teacher]),
+  authVerify([userRoles.teacher, userRoles.principal]),
   upload.array("images"),
   handleZodValidation(AssetValidationSchema.partial(), true),
   assetController.updateAsset

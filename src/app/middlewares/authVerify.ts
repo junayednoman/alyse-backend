@@ -17,7 +17,7 @@ const authVerify = (allowedRoles: string[]) =>
 
 
       const decoded = verifyJWT(token);
-      
+
       const user = await Auth.findOne({
         email: decoded.email,
         isDeleted: false,

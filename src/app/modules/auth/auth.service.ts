@@ -25,9 +25,9 @@ const loginUser = async (payload: { email: string; password: string, isRemember:
 
   const user = await isUserExist(payload.email);
 
-  if (!user.isAccountVerified) throw new AppError(400, "Please, verify your account before logging in!");
+  if (!user.isAccountVerified) throw new AppError(400, "Verify your account before logging in!");
 
-  if (user.needsPasswordChange) throw new AppError(400, "Please, change your password before logging in!");
+  if (user.needsPasswordChange) throw new AppError(400, "Change your password before logging in!");
 
   // Compare the password
   const isPasswordMatch = await bcrypt.compare(payload.password, user.password);
@@ -83,7 +83,6 @@ const sendOtp = async (payload: { email: string }) => {
     { otp: hashedOtp, otpExpires, otpAttempts: 0 },
     { new: true }
   );
-  return { otp };
 };
 
 const verifyOtp = async (payload: {

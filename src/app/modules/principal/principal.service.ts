@@ -21,7 +21,7 @@ const addPrincipal = async (payload: TPrincipal) => {
     const principal = await Principal.create([payload], { session });
     const authData = {
       email: payload.email,
-      password: "",
+      password: "dummypass",
       user: principal[0]._id,
       role: userRoles.principal,
       isAccountVerified: true,

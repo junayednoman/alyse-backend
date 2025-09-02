@@ -16,7 +16,7 @@ router.post(
 
 router.get(
   "/",
-  authVerify([userRoles.admin]),
+  authVerify([userRoles.admin, userRoles.teacher]),
   schoolController.getAllSchools
 );
 
