@@ -2,6 +2,7 @@ import Category from "./category.model";
 import { AppError } from "../../classes/appError";
 import { TCategory } from "./category.interface";
 import QueryBuilder from "../../classes/queryBuilder";
+import Asset from "../asset/asset.model";
 
 const createCategory = async (payload: TCategory) => {
   const existing = await Category.findOne({ name: payload.name });
@@ -44,7 +45,8 @@ const deleteCategory = async (id: string) => {
   if (!existing) {
     throw new AppError(400, "Invalid category ID!");
   }
-  throw new AppError(400, "check if any asset is assigned to this category");
+  const asset = await Asset.findOne({ category: id });
+  if (asset) throw new AppError(400, "Category has assets, cannot delete!");
   const deleted = await Category.findByIdAndDelete(id);
   return deleted;
 };
