@@ -8,7 +8,7 @@ const TeacherSchema = new Schema<TTeacher>(
     roomNumber: { type: String, required: true },
     school: { type: Types.ObjectId, ref: "School", required: true },
     district: { type: Types.ObjectId, ref: "District", required: true },
-    image: { type: String },
+    image: { type: String, default: null },
   },
   {
     timestamps: true,

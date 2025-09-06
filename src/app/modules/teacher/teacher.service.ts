@@ -152,7 +152,7 @@ const getTeachersByDistrictId = async (districtId: string, query: Record<string,
 };
 
 const getTeacherProfile = async (email: string) => {
-  const teacher = await Teacher.findOne({ email });
+  const teacher = await Teacher.findOne({ email }).populate("school", "name");
 
   return teacher;
 };
