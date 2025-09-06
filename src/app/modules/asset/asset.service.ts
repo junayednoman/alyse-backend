@@ -68,7 +68,11 @@ const getAllAssets = async (userId: string, query: Record<string, any>) => {
       { path: "teacher", select: "user role", populate: { path: "user", select: "name image email" } },
       // { path: "district", select: "name logo" }
     ])
-  return { data: result, meta };
+
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+
+  return { data: result, meta, page, limit };
 };
 
 const getSingleAsset = async (id: string) => {

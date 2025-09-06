@@ -32,7 +32,10 @@ const getDistricts = async (query: Record<string, any>) => {
   const meta = await userQuery.countTotal();
   const result = await userQuery.queryModel;
 
-  return { data: result, meta };
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+
+  return { data: result, meta, page, limit };
 }
 
 const updateDistrict = async (id: string, payload: TDistrict, file?: TFile) => {

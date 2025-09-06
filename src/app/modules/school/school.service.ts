@@ -32,7 +32,11 @@ const getAllSchools = async (query: Record<string, any>) => {
 
   const meta = await schoolQuery.countTotal();
   const result = await schoolQuery.queryModel.populate("district", "name code");
-  return { data: result, meta };
+
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+
+  return { data: result, meta, page, limit };
 };
 
 const getSchoolById = async (id: string) => {

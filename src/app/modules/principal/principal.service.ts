@@ -54,7 +54,11 @@ const getAllPrincipals = async (query: Record<string, any>) => {
   const result = await categoryQuery.queryModel.populate([
     { path: "user", populate: { path: "district", select: "name logo code type" } }
   ]);
-  return { data: result, meta };
+
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+
+  return { data: result, meta, page, limit };;
 };
 
 const getPrincipalById = async (id: string) => {

@@ -38,8 +38,9 @@ const getMessagesByChatId = async (query: Record<string, any>) => {
   const result = await messageQuery.queryModel.populate("chat", "asset").sort({ createdAt: 1 });
 
   const asset = await Asset.findById((result[0].chat as any).asset);
-
-  return { asset, messages: result, meta };
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+  return { asset, messages: result, meta, page, limit };
 };
 
 const updateMessage = async (id: string, userId: string, payload: Partial<TMessage>) => {

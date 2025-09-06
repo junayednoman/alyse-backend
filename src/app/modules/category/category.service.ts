@@ -24,7 +24,11 @@ const getAllCategories = async (query: Record<string, any>) => {
 
   const meta = await categoryQuery.countTotal();
   const result = await categoryQuery.queryModel;
-  return { data: result, meta };
+
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+
+  return { data: result, meta, page, limit };
 };
 
 const updateCategory = async (id: string, payload: Partial<TCategory>) => {

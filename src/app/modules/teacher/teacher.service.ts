@@ -118,7 +118,11 @@ const getAllTeachers = async (query: Record<string, any>) => {
       populate: [{ path: "district", select: "name logo code type" }, { path: "school", select: "name" }],
     }
   ])
-  return { data: result, meta };
+
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+
+  return { data: result, meta, page, limit };
 };
 
 const getSingleTeacher = async (id: string) => {
@@ -148,7 +152,11 @@ const getTeachersByDistrictId = async (districtId: string, query: Record<string,
 
   const meta = await teacherQuery.countTotal();
   const result = await teacherQuery.queryModel.populate("school", "name").populate("district", "name");
-  return { data: result, meta };
+
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+
+  return { data: result, meta, page, limit };
 };
 
 const getTeacherProfile = async (email: string) => {
