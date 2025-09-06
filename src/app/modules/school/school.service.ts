@@ -30,13 +30,14 @@ const getAllSchools = async (query: Record<string, any>) => {
     .paginate()
     .selectFields();
 
-  const meta = await schoolQuery.countTotal();
+  const total = await schoolQuery.countTotal();
   const result = await schoolQuery.queryModel.populate("district", "name code");
 
   const page = query.page || 1;
   const limit = query.limit || 10;
+  const meta = { total, page, limit };
 
-  return { data: result, meta, page, limit };
+  return { data: result, meta };
 };
 
 const getSchoolById = async (id: string) => {

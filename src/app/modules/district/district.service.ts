@@ -29,13 +29,14 @@ const getDistricts = async (query: Record<string, any>) => {
     .paginate()
     .selectFields();
 
-  const meta = await userQuery.countTotal();
+  const total = await userQuery.countTotal();
   const result = await userQuery.queryModel;
 
   const page = query.page || 1;
   const limit = query.limit || 10;
+  const meta = { total, page, limit };
 
-  return { data: result, meta, page, limit };
+  return { data: result, meta };
 }
 
 const updateDistrict = async (id: string, payload: TDistrict, file?: TFile) => {

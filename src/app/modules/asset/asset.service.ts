@@ -61,7 +61,7 @@ const getAllAssets = async (userId: string, query: Record<string, any>) => {
     .paginate()
     .selectFields();
 
-  const meta = await assetQuery.countTotal();
+  const total = await assetQuery.countTotal();
   const result = await assetQuery.queryModel
     .populate([
       // { path: "category", select: "name" },
@@ -71,8 +71,9 @@ const getAllAssets = async (userId: string, query: Record<string, any>) => {
 
   const page = query.page || 1;
   const limit = query.limit || 10;
+  const meta = { total, page, limit };
 
-  return { data: result, meta, page, limit };
+  return { data: result, meta };
 };
 
 const getSingleAsset = async (id: string) => {

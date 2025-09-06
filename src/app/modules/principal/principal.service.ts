@@ -50,15 +50,16 @@ const getAllPrincipals = async (query: Record<string, any>) => {
     .paginate()
     .selectFields();
 
-  const meta = await categoryQuery.countTotal();
+  const total = await categoryQuery.countTotal();
   const result = await categoryQuery.queryModel.populate([
     { path: "user", populate: { path: "district", select: "name logo code type" } }
   ]);
 
   const page = query.page || 1;
   const limit = query.limit || 10;
+  const meta = { total, page, limit };
 
-  return { data: result, meta, page, limit };;
+  return { data: result, meta };
 };
 
 const getPrincipalById = async (id: string) => {

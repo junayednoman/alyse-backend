@@ -34,13 +34,14 @@ const getMessagesByChatId = async (query: Record<string, any>) => {
     .paginate()
     .selectFields();
 
-  const meta = await messageQuery.countTotal();
+  const total = await messageQuery.countTotal();
   const result = await messageQuery.queryModel.populate("chat", "asset").sort({ createdAt: 1 });
 
   const asset = await Asset.findById((result[0].chat as any).asset);
   const page = query.page || 1;
   const limit = query.limit || 10;
-  return { asset, messages: result, meta, page, limit };
+  const meta = { total, page, limit };
+  return { asset, messages: result, meta };
 };
 
 const updateMessage = async (id: string, userId: string, payload: Partial<TMessage>) => {

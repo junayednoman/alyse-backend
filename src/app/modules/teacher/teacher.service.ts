@@ -111,7 +111,7 @@ const getAllTeachers = async (query: Record<string, any>) => {
     .paginate()
     .selectFields();
 
-  const meta = await teacherQuery.countTotal();
+  const total = await teacherQuery.countTotal();
   const result = await teacherQuery.queryModel.populate([
     {
       path: "user",
@@ -121,8 +121,9 @@ const getAllTeachers = async (query: Record<string, any>) => {
 
   const page = query.page || 1;
   const limit = query.limit || 10;
+  const meta = { total, page, limit };
 
-  return { data: result, meta, page, limit };
+  return { data: result, meta };
 };
 
 const getSingleTeacher = async (id: string) => {
@@ -150,13 +151,14 @@ const getTeachersByDistrictId = async (districtId: string, query: Record<string,
     .paginate()
     .selectFields();
 
-  const meta = await teacherQuery.countTotal();
+  const total = await teacherQuery.countTotal();
   const result = await teacherQuery.queryModel.populate("school", "name").populate("district", "name");
 
   const page = query.page || 1;
   const limit = query.limit || 10;
+  const meta = { total, page, limit };
 
-  return { data: result, meta, page, limit };
+  return { data: result, meta };
 };
 
 const getTeacherProfile = async (email: string) => {

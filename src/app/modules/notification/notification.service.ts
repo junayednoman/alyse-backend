@@ -27,8 +27,12 @@ const getAllNotifications = async (query: Record<string, any>, id: string) => {
     .paginate()
     .selectFields();
 
-  const meta = await userQuery.countTotal();
+  const total = await userQuery.countTotal();
   const result = await userQuery.queryModel;
+
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+  const meta = { total, page, limit };
 
   return { data: result, meta };
 }
