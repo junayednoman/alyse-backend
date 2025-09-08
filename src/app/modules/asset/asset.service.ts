@@ -65,7 +65,15 @@ const getAllAssets = async (userId: string, query: Record<string, any>) => {
   const result = await assetQuery.queryModel
     .populate([
       // { path: "category", select: "name" },
-      { path: "teacher", select: "user role", populate: { path: "user", select: "name image email" } },
+      {
+        path: "teacher", select: "user role",
+        populate: {
+          path: "user", select: "name image email school",
+          populate: {
+            path: "school", select: "name"
+          }
+        }
+      },
       // { path: "district", select: "name logo" }
     ])
 
@@ -81,7 +89,12 @@ const getSingleAsset = async (id: string) => {
     { path: "category", select: "name" },
     {
       path: "teacher", select: "user role",
-      populate: { path: "user" }
+      populate: {
+        path: "user", select: "name image email school",
+        populate: {
+          path: "school", select: "name"
+        }
+      }
     },
   ]);
   return asset;
@@ -89,15 +102,37 @@ const getSingleAsset = async (id: string) => {
 
 const getMyPostedAssets = async (userId: string) => {
   const assets = await Asset.find({ teacher: userId })
-    .populate("category", "name")
-    .populate("grabbedBy", "email");
+    .populate([
+      { path: "category", select: "name" },
+      { path: "district", select: "name logo" },
+      {
+        path: "teacher", select: "user role",
+        populate: {
+          path: "user", select: "name image email school",
+          populate: {
+            path: "school", select: "name"
+          }
+        }
+      },
+    ])
   return assets;
 };
 
 const getMyGrabbedAssets = async (userId: string) => {
   const assets = await Asset.find({ grabbedBy: userId, status: "grabbed" })
-    .populate("category", "name")
-    .populate("teacher", "email");
+    .populate([
+      { path: "category", select: "name" },
+      { path: "district", select: "name logo" },
+      {
+        path: "teacher", select: "user role",
+        populate: {
+          path: "user", select: "name image email school",
+          populate: {
+            path: "school", select: "name"
+          }
+        }
+      },
+    ])
   return assets;
 };
 
