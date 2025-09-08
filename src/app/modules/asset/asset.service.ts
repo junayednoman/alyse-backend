@@ -12,7 +12,7 @@ import { assetStatus, userRoles } from "../../constants/global.constant";
 import { District } from "../district/district.model";
 import fs from "fs";
 import { sendEmail } from "../../utils/sendEmail";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 
 const createAsset = async (userId: string, payload: TAsset, files: any[]) => {
   const session = await startSession();
@@ -137,9 +137,10 @@ const getMyGrabbedAssets = async (userId: string) => {
 };
 
 const grabAsset = async (userId: string, id: string) => {
-  const asset = await Asset.findById(id).populate([
-    { path: "teacher", select: "user role", populate: { path: "user", select: "name" } }
-  ]);
+  const asset = await Asset.findById(id)
+    .populate([
+      { path: "teacher", select: "user role", populate: { path: "user", select: "name email" } }
+    ]);
   if (!asset) throw new AppError(400, "Invalid asset ID!");
   if (asset.status === assetStatus.grabbed) throw new AppError(400, "This asset is already grabbed!");
 
@@ -149,27 +150,26 @@ const grabAsset = async (userId: string, id: string) => {
     const year = new Date().getFullYear().toString();
     const emailTemplatePath = "./src/app/emailTemplates/assetGrabbed.html";
 
-    const parsedDate = parseISO((updated as any).updatedAt.toString());
-
-    // Format as "Aug 4, 2025"
-    const formattedDate = format(parsedDate, 'MMM d, yyyy');
+    // Format
+    const formattedDate = format((updated as any).createdAt, 'MMM d, yyyy');
     const auth = await Auth.findById(userId).populate([
       {
-        path: "user", select: "name", populate: {
+        path: "user", select: "name email", populate: {
           path: "school", select: "name"
         }
       }
     ]);
+
     fs.readFile(emailTemplatePath, "utf8", (err, data) => {
       if (err) throw new AppError(500, err.message || "Something went wrong");
       const emailContent = data
-        .replace('{{owner_name}}', (asset.teacher as any).user.name)
+        .replace('{{owner_name}}', (asset?.teacher as any)?.user.name)
         .replace('{{year}}', year)
         .replace('{{date_time}}', formattedDate)
-        .replace('{{claimer_name}}', (auth?.user as any).name)
-        .replace('{{claimer_school}}', (auth?.user as any).school.name)
+        .replace('{{claimer_name}}', (auth?.user as any)?.name)
+        .replace('{{claimer_school}}', (auth?.user as any)?.school.name)
 
-      sendEmail((asset.teacher as any).email, subject, emailContent);
+      sendEmail((asset?.teacher as any)?.user?.email, subject, emailContent);
     })
   }
   return updated;

@@ -7,7 +7,7 @@ import { startOfYear, endOfYear } from "date-fns";
 
 const getDashboardSummary = async (userId: string, year: number) => {
   const user = await Auth.findById(userId).populate("user");
-  const availableAssetQuery = { status: assetStatus.available } as Record<string, any>
+  const availableAssetQuery = { status: assetStatus.approved } as Record<string, any>
   const grabbedAssetQuery = { status: assetStatus.grabbed } as Record<string, any>
   const allAssetQuery = {} as Record<string, any>
   if (user?.role === userRoles.principal) {
@@ -60,8 +60,6 @@ const getDashboardSummary = async (userId: string, year: number) => {
       users: found ? found.users : 0,
     };
   });
-
-
 
   return { availableAssets, grabbedAssets, allAssets, fullStats: fullSummary }
 }
