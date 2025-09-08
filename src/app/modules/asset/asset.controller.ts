@@ -47,7 +47,7 @@ const getSingleAsset = handleAsyncRequest(async (req: any, res) => {
 const grabAsset = handleAsyncRequest(async (req: any, res) => {
   const result = await assetService.grabAsset(req.user.id, req.params.id);
   successResponse(res, {
-    message: "Asset status changed successfully!",
+    message: "Asset grabbed successfully!",
     data: result,
   });
 });
