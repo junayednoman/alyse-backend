@@ -144,7 +144,11 @@ const grabAsset = async (userId: string, id: string) => {
   if (!asset) throw new AppError(400, "Invalid asset ID!");
   if (asset.status === assetStatus.grabbed) throw new AppError(400, "This asset is already grabbed!");
 
-  const updated = await Asset.findByIdAndUpdate(id, { status: assetStatus.grabbed, grabbedBy: userId }, { new: true });
+  const updated = await Asset.findByIdAndUpdate(id, { status: assetStatus.grabbed, grabbedBy: userId }, { new: true }).populate([
+    { path: "teacher", select: "user role", populate: { path: "user", select: "name" } },
+    { path: "district", select: "name" },
+    { path: "grabbedBy", select: "user role", populate: { path: "user", select: "name" } }
+  ]);
   if (updated) {
     const subject = `Your asset has been grabbed - D.A.M`;
     const year = new Date().getFullYear().toString();
