@@ -100,40 +100,69 @@ const getSingleAsset = async (id: string) => {
   return asset;
 };
 
-const getMyPostedAssets = async (userId: string) => {
-  const assets = await Asset.find({ teacher: userId })
-    .populate([
-      { path: "category", select: "name" },
-      { path: "district", select: "name logo" },
-      {
-        path: "teacher", select: "user role",
+const getMyPostedAssets = async (userId: string, query: Record<string, any>) => {
+  const searchableFields = ["name", "description", "material"];
+  query.teacher = userId
+  const categoryQuery = new QueryBuilder(Asset.find(), query)
+    .search(searchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .selectFields();
+
+  const total = await categoryQuery.countTotal();
+  const result = await categoryQuery.queryModel.populate([
+    { path: "category", select: "name" },
+    { path: "district", select: "name logo" },
+    {
+      path: "teacher", select: "user role",
+      populate: {
+        path: "user", select: "name image email school",
         populate: {
-          path: "user", select: "name image email school",
-          populate: {
-            path: "school", select: "name"
-          }
+          path: "school", select: "name"
         }
-      },
-    ])
-  return assets;
+      }
+    },
+  ]);
+
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+  const meta = { total, page, limit };
+
+  return { data: result, meta };
 };
 
-const getMyGrabbedAssets = async (userId: string) => {
-  const assets = await Asset.find({ grabbedBy: userId, status: "grabbed" })
-    .populate([
-      { path: "category", select: "name" },
-      { path: "district", select: "name logo" },
-      {
-        path: "teacher", select: "user role",
+const getMyGrabbedAssets = async (userId: string, query: Record<string, any>) => {
+  const searchableFields = ["name", "description", "material"];
+  query.grabbedBy = userId
+  query.status = "grabbed"
+  const categoryQuery = new QueryBuilder(Asset.find(), query)
+    .search(searchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .selectFields();
+
+  const total = await categoryQuery.countTotal();
+  const result = await categoryQuery.queryModel.populate([
+    { path: "category", select: "name" },
+    { path: "district", select: "name logo" },
+    {
+      path: "teacher", select: "user role",
+      populate: {
+        path: "user", select: "name image email school",
         populate: {
-          path: "user", select: "name image email school",
-          populate: {
-            path: "school", select: "name"
-          }
+          path: "school", select: "name"
         }
-      },
-    ])
-  return assets;
+      }
+    },
+  ]);
+
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+  const meta = { total, page, limit };
+
+  return { data: result, meta };
 };
 
 const grabAsset = async (userId: string, id: string) => {
