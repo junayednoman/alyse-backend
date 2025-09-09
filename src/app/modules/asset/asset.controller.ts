@@ -21,7 +21,7 @@ const getAllAssets = handleAsyncRequest(async (req: any, res) => {
 });
 
 const getMyPostedAssets = handleAsyncRequest(async (req: any, res) => {
-  const result = await assetService.getMyPostedAssets(req.user.id);
+  const result = await assetService.getMyPostedAssets(req.user.id, req.query);
   successResponse(res, {
     message: "My posted assets retrieved successfully!",
     data: result,
@@ -29,7 +29,7 @@ const getMyPostedAssets = handleAsyncRequest(async (req: any, res) => {
 });
 
 const getMyGrabbedAssets = handleAsyncRequest(async (req: any, res) => {
-  const result = await assetService.getMyGrabbedAssets(req.user.id);
+  const result = await assetService.getMyGrabbedAssets(req.user.id, req.query);
   successResponse(res, {
     message: "My grabbed assets retrieved successfully!",
     data: result,
