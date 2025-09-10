@@ -170,14 +170,14 @@ const getTeacherProfile = async (email: string) => {
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const updateTeacherProfile = async (userEmail: string, { email, ...payload }: Partial<TTeacher>) => {
   const teacher = await Teacher.findOne({ email: userEmail });
-  if (payload.district) {
+  if (payload.school) {
     const school = await School.findById(payload.school);
     if (!school) {
       throw new AppError(400, "Invalid school ID!");
     }
   }
 
-  if (payload.school) {
+  if (payload.district) {
     const district = await District.findById(payload.district);
     if (!district) {
       throw new AppError(400, "Invalid district ID!");
