@@ -48,7 +48,7 @@ const createAsset = async (userId: string, payload: TAsset, files: any[]) => {
 };
 
 const getAllAssets = async (userId: string, query: Record<string, any>) => {
-  const searchableFields = ["name", "description", "material"];
+  const searchableFields = ["name", "material"];
   const auth = await Auth.findById(userId).populate("user")
   if (auth?.role !== userRoles.admin) query.district = ((auth?.user as any)?.district as unknown as ObjectId)
 
@@ -101,7 +101,7 @@ const getSingleAsset = async (id: string) => {
 };
 
 const getMyPostedAssets = async (userId: string, query: Record<string, any>) => {
-  const searchableFields = ["name", "description", "material"];
+  const searchableFields = ["name", "material"];
   query.teacher = userId
   const categoryQuery = new QueryBuilder(Asset.find(), query)
     .search(searchableFields)
@@ -133,7 +133,7 @@ const getMyPostedAssets = async (userId: string, query: Record<string, any>) => 
 };
 
 const getMyGrabbedAssets = async (userId: string, query: Record<string, any>) => {
-  const searchableFields = ["name", "description", "material"];
+  const searchableFields = ["name", "material"];
   query.grabbedBy = userId
   query.status = "grabbed"
   const categoryQuery = new QueryBuilder(Asset.find(), query)
