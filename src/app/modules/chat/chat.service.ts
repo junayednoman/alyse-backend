@@ -4,7 +4,6 @@ import { TChat } from "./chat.interface";
 import mongoose, { ObjectId, startSession } from "mongoose";
 import Asset from "../asset/asset.model";
 import Message from "../message/message.model";
-import Auth from "../auth/auth.model";
 
 const createChat = async (userId: ObjectId, payload: TChat) => {
   const asset = await Asset.findById(payload.asset);
@@ -33,7 +32,7 @@ const createChat = async (userId: ObjectId, payload: TChat) => {
 };
 
 const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
-  const objectIdUserId = new mongoose.Types.ObjectId(userId); // Convert string to ObjectId
+  const objectIdUserId = new mongoose.Types.ObjectId(userId);
 
   const chats = await Chat.aggregate([
     // Stage 1: Match chats where the user is a participant
@@ -57,53 +56,7 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         preserveNullAndEmptyArrays: true, // Handle null lastMessage
       },
     },
-    // Stage 3: Lookup participants from Auth model
-    {
-      $lookup: {
-        from: Auth.collection.collectionName, // Dynamic collection name for Auth
-        localField: "participants",
-        foreignField: "_id",
-        as: "participantsData",
-      },
-    },
-    // Stage 4: Unwind participantsData to process each participant
-    {
-      $unwind: "$participantsData",
-    },
-    // Stage 5: Lookup user details (name, image) if user field references a User model
-    {
-      $lookup: {
-        from: "teachers", // Assuming a User model exists with name and image
-        localField: "participantsData.user",
-        foreignField: "_id",
-        as: "participantsData.userDetails",
-        pipeline: [
-          {
-            $project: {
-              _id: 1,
-              name: 1,
-              image: 1,
-            },
-          },
-        ],
-      },
-    },
-    // Stage 6: Group to rebuild the participants array with shaped data
-    {
-      $group: {
-        _id: "$_id",
-        lastMessage: { $first: "$lastMessage" },
-        participants: {
-          $push: {
-            _id: "$participantsData._id",
-            name: { $arrayElemAt: ["$participantsData.userDetails.name", 0] },
-            image: { $arrayElemAt: ["$participantsData.userDetails.image", 0] },
-            role: "$participantsData.role",
-          },
-        },
-      },
-    },
-    // Stage 7: Lookup unseen message count
+    // Stage 3: Lookup unseen message count
     {
       $lookup: {
         from: Message.collection.collectionName,
@@ -127,15 +80,25 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         as: "unseenMessages",
       },
     },
-    // Stage 8: Project final shape with unseen count
+    {
+      $lookup: {
+        from: "assets",
+        localField: "asset",
+        foreignField: "_id",
+        as: "assetDetails",
+      }
+    },
+
+    // Stage 4: Project final shape with unseen count
     {
       $project: {
         lastMessage: 1,
-        participants: 1,
         unseenCount: { $ifNull: [{ $arrayElemAt: ["$unseenMessages.unseenCount", 0] }, 0] },
+        "assetDetails.name": 1,
+        "assetDetails.images": 1
       },
     },
-    // Stage 9: Limit the number of results
+    // Stage 5: Limit the number of results
     {
       $limit: limit,
     },
