@@ -6,6 +6,7 @@ import { Server as HttpServer } from 'http';
 import { Server } from "socket.io";
 import { withSocketErrorHandler } from "./utils/withSocketErrorHandler";
 import { ObjectId } from "mongoose";
+import chatService from "./modules/chat/chat.service";
 
 // Map to track online users (key: userId, value: Set of socket IDs)
 const onlineUsers = new Map<string, Set<string>>();
@@ -77,6 +78,9 @@ const initializeSocket = (server: HttpServer) => {
 
       const message = await messageService.createMessage(messagePayload);
       io.to(chat.toString()).emit("newMessage", message);
+
+      const chats = chatService.getMyChats(userId);
+      io.to(chat.toString()).emit("updatedChats", chats);
 
       // Stop typing status when a message is sent
       if (typingUsers.has(chat.toString())) {

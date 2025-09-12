@@ -32,16 +32,19 @@ const getMessagesByChatId = async (query: Record<string, any>) => {
     .filter()
     .sort()
     .paginate()
-    .selectFields();
+    .selectFields()
+    .sort();
 
   const total = await messageQuery.countTotal();
-  const result = await messageQuery.queryModel.populate("chat", "asset").sort({ createdAt: 1 });
+  const messages = await messageQuery.queryModel.populate("chat", "asset")
 
-  const asset = await Asset.findById((result[0].chat as any).asset);
+  const asset = await Asset.findById((messages[0].chat as any).asset);
   const page = query.page || 1;
   const limit = query.limit || 10;
   const meta = { total, page, limit };
-  return { asset, messages: result, meta };
+
+  const sortedMessages = messages.sort((a: any, b: any) => a.createdAt - b.createdAt);
+  return { asset, messages: sortedMessages, meta };
 };
 
 const updateMessage = async (id: string, userId: string, payload: Partial<TMessage>) => {

@@ -98,10 +98,14 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         "assetDetails.images": 1
       },
     },
-    // Stage 5: Limit the number of results
+    // Stage 5: Sort by lastMessage createdAt (latest first)
     {
-      $limit: limit,
+      $sort: { updatedAt: -1 }
     },
+    // Stage 6: Limit the number of results
+    {
+      $limit: limit
+    }
   ]);
 
   return chats;
