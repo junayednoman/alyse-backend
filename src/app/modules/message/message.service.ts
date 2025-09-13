@@ -11,8 +11,6 @@ const createMessage = async (payload: TMessage,) => {
   const session = await startSession();
   try {
     session.startTransaction();
-    const chat = await Chat.findById(payload.chat);
-    if (!payload.chat || !chat) throw new AppError(400, "Invalid chat ID!");
     const message = await Message.create([payload], { session });
     await Chat.findByIdAndUpdate(payload.chat, { lastMessage: message[0]._id }, { session });
     await session.commitTransaction();
