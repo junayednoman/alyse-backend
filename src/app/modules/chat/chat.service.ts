@@ -53,7 +53,7 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
     {
       $unwind: {
         path: "$lastMessage",
-        preserveNullAndEmptyArrays: true, // Handle null lastMessage
+        preserveNullAndEmptyArrays: true,
       },
     },
     // Stage 3: Lookup unseen message count
@@ -88,14 +88,32 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         as: "assetDetails",
       }
     },
-
+    {
+      $lookup: {
+        from: "auths",
+        localField: "participants",
+        foreignField: "_id",
+        as: "participantsAuths",
+      }
+    },
+    {
+      $lookup: {
+        from: "teachers",
+        localField: "participantsAuths.user",
+        foreignField: "_id",
+        as: "participants",
+      }
+    },
     // Stage 4: Project final shape with unseen count
     {
       $project: {
         lastMessage: 1,
         unseenCount: { $ifNull: [{ $arrayElemAt: ["$unseenMessages.unseenCount", 0] }, 0] },
         "assetDetails.name": 1,
-        "assetDetails.images": 1
+        "assetDetails.images": 1,
+        "participants.name": 1,
+        "participants.image": 1,
+        "participants._id": 1
       },
     },
     // Stage 5: Sort by lastMessage createdAt (latest first)
