@@ -6,4 +6,5 @@ export type TMessage = {
   file?: string;
   isSeen?: boolean;
   sender: ObjectId;
+  receiver: ObjectId
 };

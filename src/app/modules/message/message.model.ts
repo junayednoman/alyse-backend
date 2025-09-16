@@ -8,6 +8,7 @@ const MessageSchema = new Schema<TMessage>(
     file: { type: String, default: null },
     isSeen: { type: Boolean, default: false },
     sender: { type: Types.ObjectId, ref: "Auth", required: true },
+    receiver: { type: Types.ObjectId, ref: "Auth", required: true },
   },
   {
     timestamps: true,

@@ -83,6 +83,7 @@ const initializeSocket = (server: HttpServer) => {
         text,
         file,
         sender: userId,
+        receiver: chatData.participants.find((id) => id !== userId) as ObjectId,
       };
 
       const message = await messageService.createMessage(messagePayload);
@@ -162,7 +163,7 @@ const initializeSocket = (server: HttpServer) => {
       });
     });
   });
-  
+
   return io;
 };
 
