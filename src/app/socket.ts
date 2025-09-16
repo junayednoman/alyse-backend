@@ -78,12 +78,14 @@ const initializeSocket = (server: HttpServer) => {
       const chatData = await Chat.findById(chat);
       if (!chatData) throw new AppError(400, "Invalid chat ID!");
 
+      const receiver = chatData.participants.find((id) => id != userId) as ObjectId;
+
       const messagePayload = {
         chat,
         text,
         file,
         sender: userId,
-        receiver: chatData.participants.find((id) => id !== userId) as ObjectId,
+        receiver
       };
 
       const message = await messageService.createMessage(messagePayload);
