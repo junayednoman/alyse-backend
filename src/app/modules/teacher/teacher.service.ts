@@ -162,9 +162,10 @@ const getTeachersByDistrictId = async (districtId: string, query: Record<string,
 };
 
 const getTeacherProfile = async (email: string) => {
+  const auth = await Auth.findOne({ email })
   const teacher = await Teacher.findOne({ email }).populate("school", "name");
 
-  return teacher;
+  return { ...teacher?.toObject(), authId: auth?._id };
 };
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
