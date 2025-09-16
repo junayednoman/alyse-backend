@@ -111,9 +111,11 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         unseenCount: { $ifNull: [{ $arrayElemAt: ["$unseenMessages.unseenCount", 0] }, 0] },
         "assetDetails.name": 1,
         "assetDetails.images": 1,
+        "assetDetails.description": 1,
+        "assetDetails.quantity": 1,
         "participants.name": 1,
         "participants.image": 1,
-        "participantsAuths._id": 1
+        "participants._id": 1,
       },
     },
     // Stage 5: Sort by lastMessage createdAt (latest first)
