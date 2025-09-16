@@ -113,7 +113,7 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         "assetDetails.images": 1,
         "participants.name": 1,
         "participants.image": 1,
-        "participants._id": 1
+        "participantsAuths._id": 1
       },
     },
     // Stage 5: Sort by lastMessage createdAt (latest first)
