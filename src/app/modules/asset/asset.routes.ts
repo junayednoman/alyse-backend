@@ -29,6 +29,12 @@ router.get(
 );
 
 router.get(
+  "/last-grabbed",
+  authVerify([userRoles.teacher]),
+  assetController.lastGrabbedAsset
+);
+
+router.get(
   "/my-grabbed",
   authVerify([userRoles.teacher]),
   assetController.getMyGrabbedAssets

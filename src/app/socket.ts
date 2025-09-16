@@ -106,8 +106,20 @@ const initializeSocket = (server: HttpServer) => {
         id,
         status: onlineUsers.has(id.toString()) ? "online" : "offline",
       }))
+
       if (statuses.length > 0) {
-        socket.emit("userStatus", statuses);
+        // socket.emit("userStatus", statuses);
+        io.to(chat.toString()).emit("userStatus", statuses);
+      }
+
+      for (const participantId of chatData.participants) {
+        const participantSockets = onlineUsers.get(participantId.toString());
+        if (participantSockets) {
+          const chats = await chatService.getMyChats(participantId.toString());
+          participantSockets.forEach((socketId) => {
+            io.to(socketId).emit("updatedChats", chats);
+          });
+        }
       }
     }));
 

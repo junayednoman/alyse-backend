@@ -18,7 +18,7 @@ const createChat = async (userId: ObjectId, payload: TChat) => {
     ]
 
     const existingChat = await Chat.findOne({ asset: payload.asset, participants: { $all: payload.participants } });
-    if (existingChat) throw new AppError(400, "Chat already exists!");
+    if (existingChat) return existingChat;
 
     const chat = await Chat.create([payload], { session });
     await session.commitTransaction();

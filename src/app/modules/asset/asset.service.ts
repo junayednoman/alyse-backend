@@ -165,6 +165,24 @@ const getMyGrabbedAssets = async (userId: string, query: Record<string, any>) =>
   return { data: result, meta };
 };
 
+const lastGrabbedAsset = async (userId: string) => {
+  const assets = await Asset.find({ status: assetStatus.grabbed, teacher: userId }).populate([
+    { path: "category", select: "name" },
+    { path: "district", select: "name logo" },
+    {
+      path: "teacher", select: "user role",
+      populate: {
+        path: "user", select: "name image email school",
+        populate: {
+          path: "school", select: "name"
+        }
+      }
+    },
+  ]);
+
+  return assets[0];
+}
+
 const grabAsset = async (userId: string, id: string) => {
   const asset = await Asset.findById(id)
     .populate([
@@ -256,5 +274,6 @@ export default {
   updateAsset,
   deleteAssetImage,
   deleteAsset,
-  getSingleAsset
+  getSingleAsset,
+  lastGrabbedAsset
 };

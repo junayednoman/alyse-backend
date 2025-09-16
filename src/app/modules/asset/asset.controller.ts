@@ -36,6 +36,14 @@ const getMyGrabbedAssets = handleAsyncRequest(async (req: any, res) => {
   });
 });
 
+const lastGrabbedAsset = handleAsyncRequest(async (req: any, res) => {
+  const result = await assetService.lastGrabbedAsset(req.user.id);
+  successResponse(res, {
+    message: "My grabbed assets retrieved successfully!",
+    data: result,
+  });
+});
+
 const getSingleAsset = handleAsyncRequest(async (req: any, res) => {
   const result = await assetService.getSingleAsset(req.params.id);
   successResponse(res, {
@@ -86,5 +94,6 @@ export default {
   updateAsset,
   deleteAssetImage,
   deleteAsset,
-  getSingleAsset
+  getSingleAsset,
+  lastGrabbedAsset
 };
