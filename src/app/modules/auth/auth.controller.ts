@@ -17,7 +17,7 @@ const loginUser = handleAsyncRequest(async (req, res) => {
 
   if (config.node_env === 'production') cookieOptions.sameSite = 'none';
 
-  res.cookie('constructionRefreshToken', refreshToken, cookieOptions);
+  res.cookie('refreshToken', refreshToken, cookieOptions);
 
   successResponse(res, {
     message: "User logged in successfully!",
@@ -27,7 +27,7 @@ const loginUser = handleAsyncRequest(async (req, res) => {
 
 const logOut = handleAsyncRequest(async (req, res) => {
   const refreshToken = req?.cookies?.refreshToken;
-  if (refreshToken) res.clearCookie('constructionRefreshToken');
+  if (refreshToken) res.clearCookie('refreshToken');
 
   successResponse(res, {
     message: "User logged out successfully!",
@@ -96,7 +96,7 @@ const changeUserStatus = handleAsyncRequest(async (req, res) => {
   const id = req.params.id;
   const result = await AuthServices.changeUserStatus(id);
   const refreshToken = req?.cookies?.refreshToken;
-  if (refreshToken) res.clearCookie('constructionRefreshToken');
+  if (refreshToken) res.clearCookie('refreshToken');
   successResponse(res, {
     message: `User account ${result?.isBlocked ? "blocked" : "unblocked"} successfully!`,
     data: result,
