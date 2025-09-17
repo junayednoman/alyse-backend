@@ -22,10 +22,12 @@ const createChat = async (userId: ObjectId, payload: TChat) => {
     ]);
     if (existingChat) return existingChat;
 
-    const chat = await Chat.create([payload], { session });
-    const result = await Chat.findById(chat[0]?._id).populate([
+    await Chat.create([payload], { session });
+
+    const result = await Chat.findOne({ asset: payload.asset }, {}, { session }).populate([
       { path: "participants", select: "user role", populate: { path: "user", select: "name image" } }
     ])
+
     await session.commitTransaction();
     return result;
   } catch (error: any) {
