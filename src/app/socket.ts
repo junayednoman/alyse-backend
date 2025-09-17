@@ -11,7 +11,6 @@ import { AppError } from "./classes/appError";
 
 // Map to track online users (key: userId, value: Set of socket IDs)
 const onlineUsers = new Map<string, Set<string>>();
-// Map to track typing status (key: chatId, value: Set of userIds currently typing)
 const typingUsers = new Map<string, Set<string>>();
 
 const initializeSocket = (server: HttpServer) => {

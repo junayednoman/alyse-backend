@@ -17,12 +17,17 @@ const createChat = async (userId: ObjectId, payload: TChat) => {
       asset.teacher
     ]
 
-    const existingChat = await Chat.findOne({ asset: payload.asset, participants: { $all: payload.participants } });
+    const existingChat = await Chat.findOne({ asset: payload.asset, participants: { $all: payload.participants } }).populate([
+      { path: "participants", select: "user role", populate: { path: "user", select: "name image" } }
+    ]);
     if (existingChat) return existingChat;
 
     const chat = await Chat.create([payload], { session });
+    const result = await Chat.findById(chat[0]?._id).populate([
+      { path: "participants", select: "user role", populate: { path: "user", select: "name image" } }
+    ])
     await session.commitTransaction();
-    return chat[0];
+    return result;
   } catch (error: any) {
     await session.abortTransaction();
     throw new AppError(500, error.message || "Error creating chat!");

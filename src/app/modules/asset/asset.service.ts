@@ -3,7 +3,7 @@ import { AppError } from "../../classes/appError";
 import { TAsset } from "./asset.interface";
 import QueryBuilder from "../../classes/queryBuilder";
 import { ObjectId, startSession } from "mongoose";
-import { uploadMultipleToS3, uploadToS3 } from "../../utils/multerS3Uploader";
+import { TFile, uploadMultipleToS3, uploadToS3 } from "../../utils/multerS3Uploader";
 import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import Auth from "../auth/auth.model";
 import Category from "../category/category.model";
@@ -14,7 +14,7 @@ import fs from "fs";
 import { sendEmail } from "../../utils/sendEmail";
 import { format } from "date-fns";
 
-const createAsset = async (userId: string, payload: TAsset, files: any[]) => {
+const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
   const session = await startSession();
 
   const teacher = await Auth.findById(userId).populate("user");
@@ -226,7 +226,7 @@ const grabAsset = async (userId: string, id: string) => {
   return updated;
 };
 
-const updateAsset = async (id: string, userId: string, payload: Partial<TAsset>, files?: any[]) => {
+const updateAsset = async (id: string, userId: string, payload: Partial<TAsset>, files?: TFile[]) => {
   const asset = await Asset.findById(id);
   if (!asset) throw new AppError(400, "Invalid asset ID!");
 
