@@ -60,7 +60,7 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
     {
       $unwind: {
         path: "$lastMessage",
-        // preserveNullAndEmptyArrays: true,
+        preserveNullAndEmptyArrays: true,
       },
     },
     // Stage 3: Lookup unseen message count
@@ -114,7 +114,7 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
     // Stage 4: Project final shape with unseen count
     {
       $project: {
-        lastMessage: 1,
+        lastMessage: { $ifNull: ["$lastMessage", null] },
         unseenCount: { $ifNull: [{ $arrayElemAt: ["$unseenMessages.unseenCount", 0] }, 0] },
         "assetDetails.name": 1,
         "assetDetails.images": 1,
