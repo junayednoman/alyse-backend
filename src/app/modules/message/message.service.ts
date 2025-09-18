@@ -24,6 +24,8 @@ const createMessage = async (payload: TMessage,) => {
 };
 
 const getMessagesByChatId = async (query: Record<string, any>) => {
+  const chat = await Chat.findById(query.chat);
+  if (!chat) throw new AppError(400, "Invalid chat ID!");
   const searchableFields = ["text", "file"];
   const messageQuery = new QueryBuilder(Message.find(), query)
     .search(searchableFields)
@@ -36,7 +38,7 @@ const getMessagesByChatId = async (query: Record<string, any>) => {
   const total = await messageQuery.countTotal();
   const messages = await messageQuery.queryModel.populate("chat", "asset")
 
-  const asset = await Asset.findById((messages[0].chat as any).asset);
+  const asset = await Asset.findById(chat.asset);
   const page = query.page || 1;
   const limit = query.limit || 10;
   const meta = { total, page, limit };
