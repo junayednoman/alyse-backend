@@ -60,7 +60,7 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
     {
       $unwind: {
         path: "$lastMessage",
-        preserveNullAndEmptyArrays: true,
+        // preserveNullAndEmptyArrays: true,
       },
     },
     // Stage 3: Lookup unseen message count
