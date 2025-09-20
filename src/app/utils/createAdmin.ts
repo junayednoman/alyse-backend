@@ -38,7 +38,8 @@ const createAdmin = async () => {
       role: "admin",
       user_type: "Admin",
       user: newAdmin[0]?._id,
-      isAccountVerified: true
+      isAccountVerified: true,
+      provider: "email"
     }
     await Auth.create(
       [authData],

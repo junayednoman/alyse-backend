@@ -27,6 +27,7 @@ const userSchema = new Schema<TAuth>(
     otpAttempts: { type: Number, default: undefined },
     isOtpVerified: { type: Boolean, default: undefined },
     needsPasswordChange: { type: Boolean, default: undefined },
+    provider: { type: String, enum: ["google", "email"], default: "email" },
     isDeleted: { type: Boolean, default: false },
     isBlocked: { type: Boolean, default: false },
   },

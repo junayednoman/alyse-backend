@@ -27,4 +27,7 @@ export default {
   aws_secret_access_key: process.env.AWS_SECRET_ACCESS_KEY,
   aws_region: process.env.AWS_REGION,
   aws_s3_bucket_name: process.env.AWS_S3_BUCKET_NAME,
+  firebase_project_id: process.env.FIREBASE_PROJECT_ID,
+  firebase_client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  firebase_private_key: process.env.FIREBASE_PRIVATE_KEY,
 };

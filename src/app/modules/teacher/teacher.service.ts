@@ -70,6 +70,7 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
       otp: hashedOtp,
       otpExpires,
       otpAttempts: 0,
+      provider: "email"
     }
 
     await Auth.findOneAndUpdate({ email: payload.email }, authData, { upsert: true });

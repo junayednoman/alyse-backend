@@ -25,6 +25,28 @@ const loginUser = handleAsyncRequest(async (req, res) => {
   });
 });
 
+const googleLogin = handleAsyncRequest(async (req, res) => {
+  const idToken = req.body.idToken;
+  const result = await AuthServices.googleLogin(idToken);
+  // // set refreshToken in cookie
+  // const day = 24 * 60 * 60 * 1000
+  // const { refreshToken, accessToken } = result;
+  // const cookieOptions: any = {
+  //   httpOnly: true,
+  //   secure: config.node_env === 'production', // Use secure in production
+  //   maxAge: payload.isRemember ? 60 * day : 20 * day,
+  // };
+
+  // if (config.node_env === 'production') cookieOptions.sameSite = 'none';
+
+  // res.cookie('refreshToken', refreshToken, cookieOptions);
+
+  successResponse(res, {
+    message: "User logged in successfully!",
+    data: result,
+  });
+});
+
 const logOut = handleAsyncRequest(async (req, res) => {
   const refreshToken = req?.cookies?.refreshToken;
   if (refreshToken) res.clearCookie('refreshToken');
@@ -106,6 +128,7 @@ const changeUserStatus = handleAsyncRequest(async (req, res) => {
 const AuthController = {
   loginUser,
   sendOtp,
+  googleLogin,
   verifyOtp,
   resetForgottenPassword,
   changePassword,

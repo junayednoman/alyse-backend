@@ -9,6 +9,8 @@ import { sendEmail } from "../../utils/sendEmail";
 import isUserExist from "../../utils/isUserExist";
 import fs from "fs";
 import path from "path";
+import { firebaseAdmin } from "../../utils/sendNotification";
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 
 const loginUser = async (payload: { email: string; password: string, isRemember: boolean }) => {
   const folderPath = 'uploads';
@@ -26,8 +28,8 @@ const loginUser = async (payload: { email: string; password: string, isRemember:
   const user = await isUserExist(payload.email);
 
   if (!user.isAccountVerified) throw new AppError(400, "Verify your account before logging in!");
-
   if (user.needsPasswordChange) throw new AppError(400, "Change your password before logging in!");
+  if (user.provider === 'google') throw new AppError(400, "Your account created using Google!");
 
   // Compare the password
   const isPasswordMatch = await bcrypt.compare(payload.password, user.password);
@@ -55,6 +57,15 @@ const loginUser = async (payload: { email: string; password: string, isRemember:
   });
   return { accessToken, refreshToken, role: user.role };
 };
+
+const googleLogin = async (idToken: string) => {
+  console.log("TOken", idToken)
+  const decodedToken: DecodedIdToken | null = await firebaseAdmin
+    .auth()
+    .verifyIdToken(idToken); // Verify the token
+
+  console.log(JSON.stringify(decodedToken));
+}
 
 const sendOtp = async (payload: { email: string }) => {
   const user = await isUserExist(payload.email);
@@ -248,6 +259,7 @@ const AuthServices = {
   changePassword,
   getNewAccessToken,
   changeUserStatus,
+  googleLogin
 };
 
 export default AuthServices;

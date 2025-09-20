@@ -8,6 +8,11 @@ import QueryBuilder from "../../classes/queryBuilder";
 import { TFile, uploadToS3 } from "../../utils/multerS3Uploader";
 import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import deleteLocalFile from "../../utils/deleteLocalFile";
+import fs from "fs";
+import { sendEmail } from "../../utils/sendEmail";
+import generateOTP from "../../utils/generateOTP";
+import config from "../../config";
+import bcrypt from "bcrypt";
 
 const addPrincipal = async (payload: TPrincipal) => {
   const existing = await Principal.findOne({ email: payload.email });
@@ -16,19 +21,40 @@ const addPrincipal = async (payload: TPrincipal) => {
   if (existingWithDistrictId) throw new AppError(400, "Principal with this district already exists!");
 
   const session = await startSession();
+  const tempPassword = generateOTP();
+  const hashedPass = await bcrypt.hash(
+    `dam-${tempPassword.toString()}`,
+    Number(config.salt_rounds)
+  );
+
   try {
     session.startTransaction();
     const principal = await Principal.create([payload], { session });
     const authData = {
       email: payload.email,
-      password: "dummypass",
+      password: hashedPass,
       user: principal[0]._id,
       role: userRoles.principal,
       isAccountVerified: true,
-      needsPasswordChange: true
+      provider: "email"
     }
 
     await Auth.create([authData], { session });
+
+    if (principal) {
+      const subject = `Access your account - D.A.M`;
+      const year = new Date().getFullYear().toString();
+      const emailTemplatePath = "./src/app/emailTemplates/principalInform.html";
+      fs.readFile(emailTemplatePath, "utf8", (err, data) => {
+        if (err) throw new AppError(500, err.message || "Something went wrong");
+        const emailContent = data
+          .replace('{{password}}', `dam-${tempPassword.toString()}`)
+          .replace('{{year}}', year);
+
+        sendEmail(payload.email, subject, emailContent);
+      })
+    }
+
     await session.commitTransaction();
     return principal;
   } catch (error) {

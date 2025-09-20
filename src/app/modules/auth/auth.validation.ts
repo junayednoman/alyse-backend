@@ -12,6 +12,10 @@ export const loginUserValidationSchema = z.object({
     .nonempty("Password is required")
 });
 
+export const googleLoginValidationSchema = z.object({
+  idToken: z.string().nonempty("ID token is required"),
+})
+
 export const emailValidationSchema = z.object({
   email: z
     .string()

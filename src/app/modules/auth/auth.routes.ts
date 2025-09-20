@@ -3,6 +3,7 @@ import { handleZodValidation } from "../../middlewares/handleZodValidation";
 import {
   changePasswordValidationSchema,
   emailValidationSchema,
+  googleLoginValidationSchema,
   loginUserValidationSchema,
   resetForgottenPasswordSchema,
   verifyOtpSchema,
@@ -17,6 +18,11 @@ authRouters.post(
   "/login",
   handleZodValidation(loginUserValidationSchema),
   AuthController.loginUser
+);
+authRouters.post(
+  "/google-login",
+  handleZodValidation(googleLoginValidationSchema),
+  AuthController.googleLogin
 );
 authRouters.post(
   "/logout",
