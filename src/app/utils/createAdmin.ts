@@ -3,6 +3,7 @@ import config from "../config";
 import Admin from "../modules/admin/admin.model";
 import Auth from "../modules/auth/auth.model";
 import bcrypt from "bcrypt";
+import { userRoles } from "../constants/global.constant";
 
 const createAdmin = async () => {
   const session = await startSession();
@@ -35,7 +36,7 @@ const createAdmin = async () => {
     const authData = {
       email,
       password: hashedPassword,
-      role: "admin",
+      role: userRoles.admin,
       user_type: "Admin",
       user: newAdmin[0]?._id,
       isAccountVerified: true,

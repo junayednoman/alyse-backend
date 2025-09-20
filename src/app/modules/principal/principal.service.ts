@@ -15,7 +15,7 @@ import config from "../../config";
 import bcrypt from "bcrypt";
 
 const addPrincipal = async (payload: TPrincipal) => {
-  const existing = await Principal.findOne({ email: payload.email });
+  const existing = await Auth.findOne({ email: payload.email, isOtpVerified: true });
   if (existing) throw new AppError(400, "Principal with this email already exists!");
   const existingWithDistrictId = await Principal.findOne({ district: payload.district });
   if (existingWithDistrictId) throw new AppError(400, "Principal with this district already exists!");
@@ -51,7 +51,7 @@ const addPrincipal = async (payload: TPrincipal) => {
           .replace('{{password}}', `dam-${tempPassword.toString()}`)
           .replace('{{year}}', year);
 
-        sendEmail(payload.email, subject, emailContent);
+        return sendEmail(payload.email, subject, emailContent);
       })
     }
 
