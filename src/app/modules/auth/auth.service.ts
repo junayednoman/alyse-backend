@@ -2,7 +2,7 @@ import { AppError } from "../../classes/appError";
 import Auth from "./auth.model";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
-import jsonwebtoken, { JwtPayload } from "jsonwebtoken";
+import jsonwebtoken, { JwtPayload, Secret } from "jsonwebtoken";
 import config from "../../config";
 import generateOTP from "../../utils/generateOTP";
 import { sendEmail } from "../../utils/sendEmail";
@@ -49,11 +49,11 @@ const loginUser = async (payload: { email: string; password: string, isRemember:
   };
 
   const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
-    expiresIn: config.jwt_access_expiration,
+    expiresIn: "12h",
   });
 
   const refreshToken = jsonwebtoken.sign(jwtPayload, config.jwt_refresh_secret as string, {
-    expiresIn: payload?.isRemember ? "60d" : "20d",
+    expiresIn: payload?.isRemember ? "60d" : "30d",
   });
   return { accessToken, refreshToken, role: user.role };
 };
@@ -215,12 +215,12 @@ const changePassword = async (email: string, payload: {
     id: user._id,
   };
 
-  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
-    expiresIn: config.jwt_access_expiration,
+  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as Secret, {
+    expiresIn: "12h",
   });
 
   const refreshToken = jsonwebtoken.sign(jwtPayload, config.jwt_refresh_secret as string, {
-    expiresIn: "3d",
+    expiresIn: "30d",
   });
   return { accessToken, refreshToken, role: user.role };
 };
@@ -240,7 +240,7 @@ const getNewAccessToken = async (token: string) => {
     role: user.role,
     id: user._id,
   };
-  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: config.jwt_access_expiration });
+  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: "12h" });
   return { accessToken }
 }
 
