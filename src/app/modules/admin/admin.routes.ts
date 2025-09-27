@@ -3,8 +3,8 @@ import adminControllers from "./admin.controller";
 import authVerify from "../../middlewares/authVerify";
 import { handleZodValidation } from "../../middlewares/handleZodValidation";
 import updateAdminProfileValidationSchema from "./admin.validation";
-import { upload } from "../../utils/multerS3Uploader";
 import { userRoles } from "../../constants/global.constant";
+import { upload } from "../../utils/awss3";
 const adminRouters = Router();
 
 adminRouters.get("/", authVerify([userRoles.admin]), adminControllers.getAdminProfile);

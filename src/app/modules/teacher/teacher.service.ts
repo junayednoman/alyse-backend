@@ -3,24 +3,22 @@ import { AppError } from "../../classes/appError";
 import { TTeacher } from "./teacher.interface";
 import QueryBuilder from "../../classes/queryBuilder";
 import { startSession } from "mongoose";
-import { uploadToS3 } from "../../utils/multerS3Uploader";
-import deleteLocalFile from "../../utils/deleteLocalFile";
 import bcrypt from "bcrypt";
 import config from "../../config";
 import { userRoles } from "../../constants/global.constant";
 import generateOTP from "../../utils/generateOTP";
 import Auth from "../auth/auth.model";
-import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import fs from "fs";
 import { sendEmail } from "../../utils/sendEmail";
 import { District } from "../district/district.model";
 import School from "../school/school.model";
 import Asset from "../asset/asset.model";
+import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
+import { TFile } from "../../interfaces/file.interface";
 
 const teacherSignup = async ({ password, ...payload }: TTeacher & { password: string }, file?: any) => {
   const auth = await Auth.findOne({ email: payload.email, isAccountVerified: true });
   if (auth) {
-    deleteLocalFile(file?.filename)
     throw new AppError(400, "User already exists!");
   }
 
@@ -30,13 +28,11 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
   try {
     const district = await District.findById(payload.district)
     if (!district) {
-      deleteLocalFile(file?.filename)
       throw new AppError(400, "Invalid district ID!");
     }
 
     const school = await School.findById(payload.school)
     if (!school) {
-      deleteLocalFile(file?.filename)
       throw new AppError(400, "Invalid school ID!");
     }
 
@@ -94,7 +90,7 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
     return teacher;
   } catch (error: any) {
     await session.abortTransaction();
-    if (payload.image) await deleteFileFromS3(payload.image)
+    if (payload.image) await deleteFromS3(payload.image)
     throw new AppError(500, error.message || "Error signing up teacher!");
   } finally {
     session.endSession();
@@ -190,16 +186,16 @@ const updateTeacherProfile = async (userEmail: string, { email, ...payload }: Pa
   return updated;
 };
 
-const updateTeacherProfileImage = async (email: string, file: any) => {
+const updateTeacherProfileImage = async (email: string, file: TFile) => {
   const teacher = await Teacher.findOne({ email });
   if (!teacher) {
-    deleteLocalFile(file.filename)
     throw new AppError(400, "Invalid teacher ID!");
   }
-  const image = await uploadToS3(file)
+  if (!file) throw new AppError(400, "Image is required!");
+  const image = await uploadToS3(file);
   const payload = { image: image };
   const updated = await Teacher.findByIdAndUpdate(teacher._id, payload, { new: true });
-  if (teacher?.image) await deleteFileFromS3(teacher?.image)
+  if (teacher?.image) await deleteFromS3(teacher?.image)
   return updated;
 };
 

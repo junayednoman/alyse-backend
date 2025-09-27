@@ -4,7 +4,7 @@ import authVerify from "../../middlewares/authVerify";
 import { handleZodValidation } from "../../middlewares/handleZodValidation";
 import { AssetValidationSchema, deleteAssetImageValidationSchema } from "./asset.validation";
 import assetController from "./asset.controller";
-import { upload } from "../../utils/multerS3Uploader";
+import { upload } from "../../utils/awss3";
 
 const router = Router();
 

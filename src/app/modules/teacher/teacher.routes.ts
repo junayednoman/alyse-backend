@@ -4,7 +4,7 @@ import authVerify from "../../middlewares/authVerify";
 import { handleZodValidation } from "../../middlewares/handleZodValidation";
 import { TeacherValidationSchema, UpdateTeacherValidationSchema } from "./teacher.validation";
 import teacherController from "./teacher.controller";
-import { upload } from "../../utils/multerS3Uploader";
+import { upload } from "../../utils/awss3";
 
 const router = Router();
 

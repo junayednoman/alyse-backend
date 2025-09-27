@@ -1,14 +1,14 @@
 import { AppError } from "../../classes/appError";
-import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
-import { uploadToS3 } from "../../utils/multerS3Uploader";
+import { TFile } from "../../interfaces/file.interface";
+import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
 
-const uploadFile = async (file: any) => {
-  if (!file || !file.filename) throw new AppError(400, "File is required!");
+const uploadFile = async (file: TFile) => {
+  if (!file) throw new AppError(400, "File is required!");
   const url = await uploadToS3(file);
   return { url };
 }
 
 const deleteFile = async (fileUrl: string) => {
-  await deleteFileFromS3(fileUrl);
+  await deleteFromS3(fileUrl);
 }
 export const uploadFileService = { uploadFile, deleteFile };

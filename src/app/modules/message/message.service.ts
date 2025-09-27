@@ -3,9 +3,9 @@ import { AppError } from "../../classes/appError";
 import { TMessage } from "./message.interface";
 import QueryBuilder from "../../classes/queryBuilder";
 import { startSession } from "mongoose";
-import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import Chat from "../chat/chat.model";
 import Asset from "../asset/asset.model";
+import { deleteFromS3 } from "../../utils/awss3";
 
 const createMessage = async (payload: TMessage,) => {
   const session = await startSession();
@@ -74,7 +74,7 @@ const deleteMessage = async (id: string, userId: string) => {
     throw new AppError(401, "Unauthorized! Only the sender can delete this message.");
   }
 
-  if (message.file) await deleteFileFromS3(message.file);
+  if (message.file) await deleteFromS3(message.file);
   const deleted = await Message.findByIdAndDelete(id);
   return deleted;
 };

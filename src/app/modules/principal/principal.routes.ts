@@ -4,7 +4,7 @@ import authVerify from "../../middlewares/authVerify";
 import { handleZodValidation } from "../../middlewares/handleZodValidation";
 import { PrincipalValidationSchema, UpdatePrincipalValidationSchema } from "./principal.validation";
 import principalController from "./principal.controller";
-import { upload } from "../../utils/multerS3Uploader";
+import { upload } from "../../utils/awss3";
 
 const router = Router();
 

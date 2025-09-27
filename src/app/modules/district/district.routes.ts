@@ -4,7 +4,7 @@ import { userRoles } from "../../constants/global.constant";
 import districtController from "./district.controller";
 import { handleZodValidation } from "../../middlewares/handleZodValidation";
 import { DistrictValidationSchema, updateDistrictValidationSchema } from "./district.validation";
-import { upload } from "../../utils/multerS3Uploader";
+import { upload } from "../../utils/awss3";
 
 const router = Router();
 

@@ -1,4 +1,5 @@
-import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
+import { TFile } from "../../interfaces/file.interface";
+import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
 import { TAdmin } from "./admin.interface";
 import Admin from "./admin.model";
 
@@ -12,11 +13,13 @@ const updateAdminProfile = async (email: string, payload: Partial<TAdmin>) => {
   return result;
 };
 
-const updateAdminProfileImage = async (email: string, image: Partial<TAdmin>) => {
+const updateAdminProfileImage = async (email: string, file: TFile) => {
+  if (!file) throw new Error("Image is required!");
   const admin = await Admin.findOne({ email });
+  const image = await uploadToS3(file);
   const result = await Admin.findOneAndUpdate({ email }, { image }, { new: true });
   if (result) {
-    if (admin?.image) deleteFileFromS3(admin?.image.split(".com/")[1]);
+    if (image && admin?.image) deleteFromS3(admin?.image);
   }
   return result;
 };

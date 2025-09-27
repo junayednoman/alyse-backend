@@ -3,16 +3,15 @@ import { AppError } from "../../classes/appError";
 import { TAsset } from "./asset.interface";
 import QueryBuilder from "../../classes/queryBuilder";
 import { ObjectId, startSession } from "mongoose";
-import { TFile, uploadMultipleToS3, uploadToS3 } from "../../utils/multerS3Uploader";
-import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
 import Auth from "../auth/auth.model";
 import Category from "../category/category.model";
-import deleteLocalFile from "../../utils/deleteLocalFile";
 import { assetStatus, userRoles } from "../../constants/global.constant";
 import { District } from "../district/district.model";
 import fs from "fs";
 import { sendEmail } from "../../utils/sendEmail";
 import { format } from "date-fns";
+import { TFile } from "../../interfaces/file.interface";
+import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
 
 const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
   const session = await startSession();
@@ -26,11 +25,16 @@ const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
 
   const category = await Category.findById(payload.category);
   if (!category) {
-    files.map(file => deleteLocalFile(file.filename))
     throw new AppError(400, "Invalid category id!");
   }
 
-  const imageUrls = await uploadMultipleToS3(files)
+  const imageUrls = [];
+  if (files && files.length) {
+    for (const file of files) {
+      const image = await uploadToS3(file);
+      imageUrls.push(image)
+    }
+  }
   payload.images = imageUrls
 
   try {
@@ -40,7 +44,7 @@ const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
     return asset[0];
   } catch (error: any) {
     await session.abortTransaction();
-    if (files) await Promise.all(imageUrls.map(url => deleteFileFromS3(url)));
+    if (files) await Promise.all(imageUrls.map(url => deleteFromS3(url)));
     throw new AppError(500, error.message || "Error creating asset!");
   } finally {
     session.endSession();
@@ -226,7 +230,7 @@ const grabAsset = async (userId: string, id: string) => {
   return updated;
 };
 
-const updateAsset = async (id: string, userId: string, payload: Partial<TAsset>, files?: TFile[]) => {
+const updateAsset = async (id: string, payload: Partial<TAsset>, files?: TFile[]) => {
   const asset = await Asset.findById(id);
   if (!asset) throw new AppError(400, "Invalid asset ID!");
 
@@ -250,7 +254,7 @@ const deleteAssetImage = async (id: string, userId: string, imageUrl: string) =>
   if (userId !== asset.teacher.toString()) throw new AppError(401, "Unauthorized! Only the teacher can delete images.");
 
   if (!asset.images.includes(imageUrl)) throw new AppError(400, "Image not found in asset!");
-  await deleteFileFromS3(imageUrl);
+  await deleteFromS3(imageUrl);
   asset.images = asset.images.filter(img => img !== imageUrl);
   const updated = await asset.save();
   return updated;

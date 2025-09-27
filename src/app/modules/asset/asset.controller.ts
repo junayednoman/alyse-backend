@@ -62,7 +62,7 @@ const grabAsset = handleAsyncRequest(async (req: any, res) => {
 
 const updateAsset = handleAsyncRequest(async (req: any, res) => {
   const payload = JSON.parse(req?.body?.payload || '{}');
-  const result = await assetService.updateAsset(req.params.id, req.user.id, payload, req.files);
+  const result = await assetService.updateAsset(req.params.id, payload, req.files);
   successResponse(res, {
     message: "Asset updated successfully!",
     data: result,

@@ -5,14 +5,13 @@ import { startSession } from "mongoose";
 import { userRoles } from "../../constants/global.constant";
 import Auth from "../auth/auth.model";
 import QueryBuilder from "../../classes/queryBuilder";
-import { TFile, uploadToS3 } from "../../utils/multerS3Uploader";
-import { deleteFileFromS3 } from "../../utils/deleteFileFromS3";
-import deleteLocalFile from "../../utils/deleteLocalFile";
 import fs from "fs";
 import { sendEmail } from "../../utils/sendEmail";
 import generateOTP from "../../utils/generateOTP";
 import config from "../../config";
 import bcrypt from "bcrypt";
+import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
+import { TFile } from "../../interfaces/file.interface";
 
 const addPrincipal = async (payload: TPrincipal) => {
   const existing = await Auth.findOne({ email: payload.email, isOtpVerified: true });
@@ -111,14 +110,13 @@ const updatePrincipalImage = async (email: string, file: TFile) => {
   if (!file) throw new AppError(400, "Image is required!");
   const principal = await Principal.findOne({ email });
   if (!principal) {
-    deleteLocalFile(file.filename);
     throw new AppError(400, "Invalid principal ID!");
   }
   const image = await uploadToS3(file);
 
   const updated = await Principal.findByIdAndUpdate(principal._id, { image }, { new: true });
-  if (principal?.image && updated) {
-    await deleteFileFromS3(principal?.image)
+  if (principal?.image && image && updated) {
+    await deleteFromS3(principal?.image)
   }
   return updated;
 };

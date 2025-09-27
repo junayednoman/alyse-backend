@@ -2,7 +2,7 @@ import { Router } from "express";
 import { uploadFileController } from "./uploadFile.controller";
 import { handleZodValidation } from "../../middlewares/handleZodValidation";
 import { deleteFileValidationSchema } from "./uploadFile.validation";
-import { upload } from "../../utils/multerS3Uploader";
+import { upload } from "../../utils/awss3";
 
 const router = Router()
 
