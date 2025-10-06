@@ -26,7 +26,7 @@ const globalErrorHandler = (
 
   // check if the error is from zod validation
   if (err instanceof ZodError) {
-    message = "Data validation error!";
+    message = err?.issues[0]?.message || "Data validation error!";
     statusCode = 400;
     errorSource = err?.issues?.map((issue: ZodIssue) => ({
       path: issue?.path[issue?.path.length - 1],
