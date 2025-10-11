@@ -9,8 +9,8 @@ import { sendEmail } from "../../utils/sendEmail";
 import isUserExist from "../../utils/isUserExist";
 import fs from "fs";
 import path from "path";
-import { firebaseAdmin } from "../../utils/sendNotification";
-import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
+// import { firebaseAdmin } from "../../utils/sendNotification";
+// import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 
 const loginUser = async (payload: {
   email: string;
@@ -75,16 +75,16 @@ const loginUser = async (payload: {
 
 const googleLogin = async (idToken: string) => {
   console.log("idToken, ", idToken);
-  try {
-    const decodedToken: DecodedIdToken | null = await firebaseAdmin
-      .auth()
-      .verifyIdToken(
-        "eyJhbGciOiJSUzI1NiIsImtpZCI6ImU4MWYwNTJhZWYwNDBhOTdjMzlkMjY1MzgxZGU2Y2I0MzRiYzM1ZjMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiU2FtaW0gSmFtYW4iLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSURwN3ZVTjMwUnFma3IxaVphemZTRFdHTU43T2hjVmw4YWp5cEpDX296aFRUdkhKbz1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9leHBpcnlkZWFscy00ODMxNiIsImF1ZCI6ImV4cGlyeWRlYWxzLTQ4MzE2IiwiYXV0aF90aW1lIjoxNzU5OTk1Mzc5LCJ1c2VyX2lkIjoiNDFmOEFLekw1eU15dWdDUGs0RTlqWHZONWlIMiIsInN1YiI6IjQxZjhBS3pMNXlNeXVnQ1BrNEU5alh2TjVpSDIiLCJpYXQiOjE3NTk5OTUzNzksImV4cCI6MTc1OTk5ODk3OSwiZW1haWwiOiJzYW1pbWNzZTlAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDM3MTU1NjIyNzIxODAwNzA2NTEiXSwiZW1haWwiOlsic2FtaW1jc2U5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.RWAgHk6AB8XeAGpVlVAtNdPLKpCG41i6FiA-IQsGJ3mh7klD20muXPuff9PZGLAvwf2JSe2RaSHlzXMu9QITnskHImEt3qwDMdt1r9nUyZUgrFS9n1KLOP2VyQXo5heBsJDeGkh6p7SSq4sft5S95Zaj45"
-      );
-    console.log("decodedToken", decodedToken);
-  } catch (error) {
-    console.log("error", error);
-  }
+  // try {
+  //   const decodedToken: DecodedIdToken | null = await firebaseAdmin
+  //     .auth()
+  //     .verifyIdToken(
+  //       "eyJhbGciOiJSUzI1NiIsImtpZCI6ImU4MWYwNTJhZWYwNDBhOTdjMzlkMjY1MzgxZGU2Y2I0MzRiYzM1ZjMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiU2FtaW0gSmFtYW4iLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSURwN3ZVTjMwUnFma3IxaVphemZTRFdHTU43T2hjVmw4YWp5cEpDX296aFRUdkhKbz1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9leHBpcnlkZWFscy00ODMxNiIsImF1ZCI6ImV4cGlyeWRlYWxzLTQ4MzE2IiwiYXV0aF90aW1lIjoxNzU5OTk1Mzc5LCJ1c2VyX2lkIjoiNDFmOEFLekw1eU15dWdDUGs0RTlqWHZONWlIMiIsInN1YiI6IjQxZjhBS3pMNXlNeXVnQ1BrNEU5alh2TjVpSDIiLCJpYXQiOjE3NTk5OTUzNzksImV4cCI6MTc1OTk5ODk3OSwiZW1haWwiOiJzYW1pbWNzZTlAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDM3MTU1NjIyNzIxODAwNzA2NTEiXSwiZW1haWwiOlsic2FtaW1jc2U5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.RWAgHk6AB8XeAGpVlVAtNdPLKpCG41i6FiA-IQsGJ3mh7klD20muXPuff9PZGLAvwf2JSe2RaSHlzXMu9QITnskHImEt3qwDMdt1r9nUyZUgrFS9n1KLOP2VyQXo5heBsJDeGkh6p7SSq4sft5S95Zaj45"
+  //     );
+  //   console.log("decodedToken", decodedToken);
+  // } catch (error) {
+  //   console.log("error", error);
+  // }
 };
 
 const sendOtp = async (payload: { email: string }) => {

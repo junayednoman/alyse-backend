@@ -1,16 +1,16 @@
-import admin from "firebase-admin";
+// import admin from "firebase-admin";
 import { StatusCodes } from "http-status-codes";
 import { AppError } from "../classes/appError";
 import { TNotificationPayload } from "../modules/notification/notification.interface";
 import NotificationModel from "../modules/notification/notification.model";
 // import firebaseJsonFile from "../private/alyse-firebase.json";
-import firebaseJsonFile from "../private/expirydeals-48316-9bd60b4ed3b0.json";
+// import firebaseJsonFile from "../private/expirydeals-48316-9bd60b4ed3b0.json";
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(firebaseJsonFile as admin.ServiceAccount),
-  });
-}
+// if (!admin.apps.length) {
+//   admin.initializeApp({
+//     credential: admin.credential.cert(firebaseJsonFile as admin.ServiceAccount),
+//   });
+// }
 
 // export const sendNotification = async (
 //   fcmToken: string[],
@@ -83,4 +83,4 @@ export const sendNotification = async (payload: TNotificationPayload) => {
   }
 };
 
-export const firebaseAdmin = admin;
+// export const firebaseAdmin = admin;
