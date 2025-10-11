@@ -10,14 +10,18 @@ import isUserExist from "../../utils/isUserExist";
 import fs from "fs";
 import path from "path";
 import { firebaseAdmin } from "../../utils/sendNotification";
-import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 
-const loginUser = async (payload: { email: string; password: string, isRemember: boolean }) => {
-  const folderPath = 'uploads';
+const loginUser = async (payload: {
+  email: string;
+  password: string;
+  isRemember: boolean;
+}) => {
+  const folderPath = "uploads";
   const files = fs.readdirSync(folderPath);
 
   if (files.length > 0) {
-    files.forEach(file => {
+    files.forEach((file) => {
       const filePath = path.join(folderPath, file);
       if (fs.lstatSync(filePath).isFile()) {
         fs.unlinkSync(filePath);
@@ -27,9 +31,12 @@ const loginUser = async (payload: { email: string; password: string, isRemember:
 
   const user = await isUserExist(payload.email);
 
-  if (!user.isAccountVerified) throw new AppError(400, "Verify your account before logging in!");
-  if (user.needsPasswordChange) throw new AppError(400, "Change your password before logging in!");
-  if (user.provider === 'google') throw new AppError(400, "Your account created using Google!");
+  if (!user.isAccountVerified)
+    throw new AppError(400, "Verify your account before logging in!");
+  if (user.needsPasswordChange)
+    throw new AppError(400, "Change your password before logging in!");
+  if (user.provider === "google")
+    throw new AppError(400, "Your account created using Google!");
 
   // Compare the password
   const isPasswordMatch = await bcrypt.compare(payload.password, user.password);
@@ -48,24 +55,37 @@ const loginUser = async (payload: { email: string; password: string, isRemember:
     id: user._id,
   };
 
-  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
-    expiresIn: "12h",
-  });
+  const accessToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    {
+      expiresIn: "12h",
+    }
+  );
 
-  const refreshToken = jsonwebtoken.sign(jwtPayload, config.jwt_refresh_secret as string, {
-    expiresIn: payload?.isRemember ? "60d" : "30d",
-  });
+  const refreshToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    {
+      expiresIn: payload?.isRemember ? "60d" : "30d",
+    }
+  );
   return { accessToken, refreshToken, role: user.role };
 };
 
 const googleLogin = async (idToken: string) => {
-  console.log("TOken", idToken)
-  const decodedToken: DecodedIdToken | null = await firebaseAdmin
-    .auth()
-    .verifyIdToken(idToken); // Verify the token
-
-  console.log(JSON.stringify(decodedToken));
-}
+  console.log("idToken, ", idToken);
+  try {
+    const decodedToken: DecodedIdToken | null = await firebaseAdmin
+      .auth()
+      .verifyIdToken(
+        "eyJhbGciOiJSUzI1NiIsImtpZCI6ImU4MWYwNTJhZWYwNDBhOTdjMzlkMjY1MzgxZGU2Y2I0MzRiYzM1ZjMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiU2FtaW0gSmFtYW4iLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSURwN3ZVTjMwUnFma3IxaVphemZTRFdHTU43T2hjVmw4YWp5cEpDX296aFRUdkhKbz1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9leHBpcnlkZWFscy00ODMxNiIsImF1ZCI6ImV4cGlyeWRlYWxzLTQ4MzE2IiwiYXV0aF90aW1lIjoxNzU5OTk1Mzc5LCJ1c2VyX2lkIjoiNDFmOEFLekw1eU15dWdDUGs0RTlqWHZONWlIMiIsInN1YiI6IjQxZjhBS3pMNXlNeXVnQ1BrNEU5alh2TjVpSDIiLCJpYXQiOjE3NTk5OTUzNzksImV4cCI6MTc1OTk5ODk3OSwiZW1haWwiOiJzYW1pbWNzZTlAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDM3MTU1NjIyNzIxODAwNzA2NTEiXSwiZW1haWwiOlsic2FtaW1jc2U5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.RWAgHk6AB8XeAGpVlVAtNdPLKpCG41i6FiA-IQsGJ3mh7klD20muXPuff9PZGLAvwf2JSe2RaSHlzXMu9QITnskHImEt3qwDMdt1r9nUyZUgrFS9n1KLOP2VyQXo5heBsJDeGkh6p7SSq4sft5S95Zaj45"
+      );
+    console.log("decodedToken", decodedToken);
+  } catch (error) {
+    console.log("error", error);
+  }
+};
 
 const sendOtp = async (payload: { email: string }) => {
   const user = await isUserExist(payload.email);
@@ -83,11 +103,11 @@ const sendOtp = async (payload: { email: string }) => {
   fs.readFile(emailTemplatePath, "utf8", (err, data) => {
     if (err) throw new AppError(500, err.message || "Something went wrong");
     const emailContent = data
-      .replace('{{otp}}', otp.toString())
-      .replace('{{year}}', year);
+      .replace("{{otp}}", otp.toString())
+      .replace("{{year}}", year);
 
     sendEmail(payload.email, subject, emailContent);
-  })
+  });
 
   await Auth.findByIdAndUpdate(
     user._id,
@@ -131,11 +151,10 @@ const verifyOtp = async (payload: {
     const emailTemplatePath = "./src/app/emailTemplates/otpSuccess.html";
     fs.readFile(emailTemplatePath, "utf8", (err, data) => {
       if (err) throw new AppError(500, err.message || "Something went wrong");
-      const emailContent = data
-        .replace('{{year}}', year);
+      const emailContent = data.replace("{{year}}", year);
 
       sendEmail(payload.email, subject, emailContent);
-    })
+    });
 
     return await Auth.findByIdAndUpdate(user._id, {
       isAccountVerified: true,
@@ -172,20 +191,23 @@ const resetForgottenPassword = async (payload: {
   if (newAuth) {
     const subject = `Your Password Has Been Successfully Reset - D.A.M`;
     const year = new Date().getFullYear().toString();
-    const emailTemplatePath = "./src/app/emailTemplates/passwordResetSuccess.html";
+    const emailTemplatePath =
+      "./src/app/emailTemplates/passwordResetSuccess.html";
     fs.readFile(emailTemplatePath, "utf8", (err, data) => {
       if (err) throw new AppError(500, err.message || "Something went wrong");
-      const emailContent = data
-        .replace('{{year}}', year);
+      const emailContent = data.replace("{{year}}", year);
       sendEmail(payload.email, subject, emailContent);
-    })
+    });
   }
 };
 
-const changePassword = async (email: string, payload: {
-  oldPassword: string;
-  newPassword: string;
-}) => {
+const changePassword = async (
+  email: string,
+  payload: {
+    oldPassword: string;
+    newPassword: string;
+  }
+) => {
   const user = await isUserExist(email);
 
   // Compare the password
@@ -215,23 +237,38 @@ const changePassword = async (email: string, payload: {
     id: user._id,
   };
 
-  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as Secret, {
-    expiresIn: "12h",
-  });
+  const accessToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_access_secret as Secret,
+    {
+      expiresIn: "12h",
+    }
+  );
 
-  const refreshToken = jsonwebtoken.sign(jwtPayload, config.jwt_refresh_secret as string, {
-    expiresIn: "30d",
-  });
+  const refreshToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    {
+      expiresIn: "30d",
+    }
+  );
   return { accessToken, refreshToken, role: user.role };
 };
 
 const getNewAccessToken = async (token: string) => {
   // verify token
-  const decoded = jsonwebtoken.verify(token, config.jwt_refresh_secret as string) as JwtPayload
-  const user = await Auth.findOne({ email: decoded.email, isDeleted: false, isBlocked: false });
+  const decoded = jsonwebtoken.verify(
+    token,
+    config.jwt_refresh_secret as string
+  ) as JwtPayload;
+  const user = await Auth.findOne({
+    email: decoded.email,
+    isDeleted: false,
+    isBlocked: false,
+  });
 
   if (!user) {
-    throw new AppError(404, "User not found!")
+    throw new AppError(404, "User not found!");
   }
 
   // generate token
@@ -240,15 +277,23 @@ const getNewAccessToken = async (token: string) => {
     role: user.role,
     id: user._id,
   };
-  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, { expiresIn: "12h" });
-  return { accessToken }
-}
+  const accessToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    { expiresIn: "12h" }
+  );
+  return { accessToken };
+};
 
 const changeUserStatus = async (id: string) => {
   const user = await Auth.findById(id);
   if (!user) throw new AppError(400, "Invalid user id!");
 
-  return await Auth.findByIdAndUpdate(user._id, { isBlocked: user.isBlocked ? false : true }, { new: true });
+  return await Auth.findByIdAndUpdate(
+    user._id,
+    { isBlocked: user.isBlocked ? false : true },
+    { new: true }
+  );
 };
 
 const AuthServices = {
@@ -259,7 +304,7 @@ const AuthServices = {
   changePassword,
   getNewAccessToken,
   changeUserStatus,
-  googleLogin
+  googleLogin,
 };
 
 export default AuthServices;

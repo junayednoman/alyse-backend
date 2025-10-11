@@ -16,8 +16,14 @@ import Asset from "../asset/asset.model";
 import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
 import { TFile } from "../../interfaces/file.interface";
 
-const teacherSignup = async ({ password, ...payload }: TTeacher & { password: string }, file?: any) => {
-  const auth = await Auth.findOne({ email: payload.email, isAccountVerified: true });
+const teacherSignup = async (
+  { password, ...payload }: TTeacher & { password: string },
+  file?: any
+) => {
+  const auth = await Auth.findOne({
+    email: payload.email,
+    isAccountVerified: true,
+  });
   if (auth) {
     throw new AppError(400, "User already exists!");
   }
@@ -26,22 +32,26 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
   session.startTransaction();
 
   try {
-    const district = await District.findById(payload.district)
+    const district = await District.findById(payload.district);
     if (!district) {
       throw new AppError(400, "Invalid district ID!");
     }
 
-    const school = await School.findById(payload.school)
+    const school = await School.findById(payload.school);
     if (!school) {
       throw new AppError(400, "Invalid school ID!");
     }
 
     if (file) {
-      const image = await uploadToS3(file)
-      payload.image = image
+      const image = await uploadToS3(file);
+      payload.image = image;
     }
 
-    const teacher = await Teacher.findOneAndUpdate({ email: payload.email }, payload, { upsert: true, new: true });
+    const teacher = await Teacher.findOneAndUpdate(
+      { email: payload.email },
+      payload,
+      { upsert: true, new: true }
+    );
 
     // hash password
     const hashedPassword = await bcrypt.hash(
@@ -66,10 +76,12 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
       otp: hashedOtp,
       otpExpires,
       otpAttempts: 0,
-      provider: "email"
-    }
+      provider: "email",
+    };
 
-    await Auth.findOneAndUpdate({ email: payload.email }, authData, { upsert: true });
+    await Auth.findOneAndUpdate({ email: payload.email }, authData, {
+      upsert: true,
+    });
 
     if (teacher) {
       // send otp
@@ -79,18 +91,18 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
       fs.readFile(emailTemplatePath, "utf8", (err, data) => {
         if (err) throw new AppError(500, err.message || "Something went wrong");
         const emailContent = data
-          .replace('{{otp}}', otp.toString())
-          .replace('{{year}}', year);
+          .replace("{{otp}}", otp.toString())
+          .replace("{{year}}", year);
 
         sendEmail(payload.email, subject, emailContent);
-      })
+      });
     }
 
     await session.commitTransaction();
     return teacher;
   } catch (error: any) {
     await session.abortTransaction();
-    if (payload.image) await deleteFromS3(payload.image)
+    if (payload.image) await deleteFromS3(payload.image);
     throw new AppError(500, error.message || "Error signing up teacher!");
   } finally {
     session.endSession();
@@ -99,8 +111,8 @@ const teacherSignup = async ({ password, ...payload }: TTeacher & { password: st
 
 const getAllTeachers = async (query: Record<string, any>) => {
   const searchableFields = ["name", "email", "roomNumber"];
-  query.role = userRoles.teacher
-  query.fields = query.fields || "isBlocked user role"
+  query.role = userRoles.teacher;
+  query.fields = query.fields || "isBlocked user role";
   const teacherQuery = new QueryBuilder(Auth.find(), query)
     .search(searchableFields)
     .filter()
@@ -112,9 +124,12 @@ const getAllTeachers = async (query: Record<string, any>) => {
   const result = await teacherQuery.queryModel.populate([
     {
       path: "user",
-      populate: [{ path: "district", select: "name logo code type" }, { path: "school", select: "name" }],
-    }
-  ])
+      populate: [
+        { path: "district", select: "name logo code type" },
+        { path: "school", select: "name" },
+      ],
+    },
+  ]);
 
   const page = query.page || 1;
   const limit = query.limit || 10;
@@ -124,22 +139,24 @@ const getAllTeachers = async (query: Record<string, any>) => {
 };
 
 const getSingleTeacher = async (id: string) => {
-  const teacher = await Auth.findById(id).select("isBlocked user role").populate([
-    {
-      path: "user",
-      populate: [
-        { path: "school" },
-        { path: "district" }
-      ]
-    }
-  ]);
+  const teacher = await Auth.findById(id)
+    .select("isBlocked user role")
+    .populate([
+      {
+        path: "user",
+        populate: [{ path: "school" }, { path: "district" }],
+      },
+    ]);
   const assets = await Asset.find({ teacher: id }).populate("category", "name");
   return { teacher, assets };
-}
+};
 
-const getTeachersByDistrictId = async (districtId: string, query: Record<string, any>) => {
+const getTeachersByDistrictId = async (
+  districtId: string,
+  query: Record<string, any>
+) => {
   const searchableFields = ["name", "email", "roomNumber"];
-  query.district = districtId
+  query.district = districtId;
 
   const teacherQuery = new QueryBuilder(Teacher.find(), query)
     .search(searchableFields)
@@ -149,7 +166,9 @@ const getTeachersByDistrictId = async (districtId: string, query: Record<string,
     .selectFields();
 
   const total = await teacherQuery.countTotal();
-  const result = await teacherQuery.queryModel.populate("school", "name").populate("district", "name");
+  const result = await teacherQuery.queryModel
+    .populate("school", "name")
+    .populate("district", "name");
 
   const page = query.page || 1;
   const limit = query.limit || 10;
@@ -159,14 +178,18 @@ const getTeachersByDistrictId = async (districtId: string, query: Record<string,
 };
 
 const getTeacherProfile = async (email: string) => {
-  const auth = await Auth.findOne({ email })
+  const auth = await Auth.findOne({ email });
   const teacher = await Teacher.findOne({ email }).populate("school", "name");
 
   return { ...teacher?.toObject(), authId: auth?._id };
 };
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const updateTeacherProfile = async (userEmail: string, { email, ...payload }: Partial<TTeacher>) => {
+const updateTeacherProfile = async (
+  userEmail: string,
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  { email, ...payload }: Partial<TTeacher>
+) => {
   const teacher = await Teacher.findOne({ email: userEmail });
   if (payload.school) {
     const school = await School.findById(payload.school);
@@ -182,7 +205,9 @@ const updateTeacherProfile = async (userEmail: string, { email, ...payload }: Pa
     }
   }
 
-  const updated = await Teacher.findByIdAndUpdate(teacher?._id, payload, { new: true });
+  const updated = await Teacher.findByIdAndUpdate(teacher?._id, payload, {
+    new: true,
+  });
   return updated;
 };
 
@@ -194,8 +219,10 @@ const updateTeacherProfileImage = async (email: string, file: TFile) => {
   if (!file) throw new AppError(400, "Image is required!");
   const image = await uploadToS3(file);
   const payload = { image: image };
-  const updated = await Teacher.findByIdAndUpdate(teacher._id, payload, { new: true });
-  if (teacher?.image) await deleteFromS3(teacher?.image)
+  const updated = await Teacher.findByIdAndUpdate(teacher._id, payload, {
+    new: true,
+  });
+  if (teacher?.image) await deleteFromS3(teacher?.image);
   return updated;
 };
 
@@ -206,5 +233,5 @@ export default {
   getTeacherProfile,
   updateTeacherProfile,
   updateTeacherProfileImage,
-  getSingleTeacher
+  getSingleTeacher,
 };
