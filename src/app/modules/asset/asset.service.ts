@@ -12,6 +12,7 @@ import { sendEmail } from "../../utils/sendEmail";
 import { format } from "date-fns";
 import { TFile } from "../../interfaces/file.interface";
 import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
+import chatService from "../chat/chat.service";
 
 const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
   const session = await startSession();
@@ -19,7 +20,9 @@ const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
   const teacher = await Auth.findById(userId).populate("user");
   payload.teacher = teacher?._id as unknown as ObjectId;
 
-  const teacherDistrict = await District.findById((teacher?.user as any)?.district);
+  const teacherDistrict = await District.findById(
+    (teacher?.user as any)?.district
+  );
   if (teacherDistrict?.type === "non-strict") payload.status = "approved";
   payload.district = (teacher?.user as any)?.district as unknown as ObjectId;
 
@@ -32,10 +35,10 @@ const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
   if (files && files.length) {
     for (const file of files) {
       const image = await uploadToS3(file);
-      imageUrls.push(image)
+      imageUrls.push(image);
     }
   }
-  payload.images = imageUrls
+  payload.images = imageUrls;
 
   try {
     session.startTransaction();
@@ -44,7 +47,7 @@ const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
     return asset[0];
   } catch (error: any) {
     await session.abortTransaction();
-    if (files) await Promise.all(imageUrls.map(url => deleteFromS3(url)));
+    if (files) await Promise.all(imageUrls.map((url) => deleteFromS3(url)));
     throw new AppError(500, error.message || "Error creating asset!");
   } finally {
     session.endSession();
@@ -53,8 +56,9 @@ const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
 
 const getAllAssets = async (userId: string, query: Record<string, any>) => {
   const searchableFields = ["name", "material"];
-  const auth = await Auth.findById(userId).populate("user")
-  if (auth?.role !== userRoles.admin) query.district = ((auth?.user as any)?.district as unknown as ObjectId)
+  const auth = await Auth.findById(userId).populate("user");
+  if (auth?.role !== userRoles.admin)
+    query.district = (auth?.user as any)?.district as unknown as ObjectId;
 
   if (auth?.role == userRoles.teacher) query.status = assetStatus.approved;
   if (auth?.role == userRoles.principal) query.status = assetStatus.pending;
@@ -66,20 +70,22 @@ const getAllAssets = async (userId: string, query: Record<string, any>) => {
     .selectFields();
 
   const total = await assetQuery.countTotal();
-  const result = await assetQuery.queryModel
-    .populate([
-      // { path: "category", select: "name" },
-      {
-        path: "teacher", select: "user role",
+  const result = await assetQuery.queryModel.populate([
+    // { path: "category", select: "name" },
+    {
+      path: "teacher",
+      select: "user role",
+      populate: {
+        path: "user",
+        select: "name image email school",
         populate: {
-          path: "user", select: "name image email school",
-          populate: {
-            path: "school", select: "name"
-          }
-        }
+          path: "school",
+          select: "name",
+        },
       },
-      // { path: "district", select: "name logo" }
-    ])
+    },
+    // { path: "district", select: "name logo" }
+  ]);
 
   const page = query.page || 1;
   const limit = query.limit || 10;
@@ -92,21 +98,27 @@ const getSingleAsset = async (id: string) => {
   const asset = await Asset.findById(id).populate([
     { path: "category", select: "name" },
     {
-      path: "teacher", select: "user role",
+      path: "teacher",
+      select: "user role",
       populate: {
-        path: "user", select: "name image email school",
+        path: "user",
+        select: "name image email school",
         populate: {
-          path: "school", select: "name"
-        }
-      }
+          path: "school",
+          select: "name",
+        },
+      },
     },
   ]);
   return asset;
 };
 
-const getMyPostedAssets = async (userId: string, query: Record<string, any>) => {
+const getMyPostedAssets = async (
+  userId: string,
+  query: Record<string, any>
+) => {
   const searchableFields = ["name", "material"];
-  query.teacher = userId
+  query.teacher = userId;
   const categoryQuery = new QueryBuilder(Asset.find(), query)
     .search(searchableFields)
     .filter()
@@ -119,13 +131,16 @@ const getMyPostedAssets = async (userId: string, query: Record<string, any>) => 
     { path: "category", select: "name" },
     { path: "district", select: "name logo" },
     {
-      path: "teacher", select: "user role",
+      path: "teacher",
+      select: "user role",
       populate: {
-        path: "user", select: "name image email school",
+        path: "user",
+        select: "name image email school",
         populate: {
-          path: "school", select: "name"
-        }
-      }
+          path: "school",
+          select: "name",
+        },
+      },
     },
   ]);
 
@@ -136,10 +151,13 @@ const getMyPostedAssets = async (userId: string, query: Record<string, any>) => 
   return { data: result, meta };
 };
 
-const getMyGrabbedAssets = async (userId: string, query: Record<string, any>) => {
+const getMyGrabbedAssets = async (
+  userId: string,
+  query: Record<string, any>
+) => {
   const searchableFields = ["name", "material"];
-  query.grabbedBy = userId
-  query.status = "grabbed"
+  query.grabbedBy = userId;
+  query.status = "grabbed";
   const categoryQuery = new QueryBuilder(Asset.find(), query)
     .search(searchableFields)
     .filter()
@@ -152,13 +170,16 @@ const getMyGrabbedAssets = async (userId: string, query: Record<string, any>) =>
     { path: "category", select: "name" },
     { path: "district", select: "name logo" },
     {
-      path: "teacher", select: "user role",
+      path: "teacher",
+      select: "user role",
       populate: {
-        path: "user", select: "name image email school",
+        path: "user",
+        select: "name image email school",
         populate: {
-          path: "school", select: "name"
-        }
-      }
+          path: "school",
+          select: "name",
+        },
+      },
     },
   ]);
 
@@ -170,67 +191,104 @@ const getMyGrabbedAssets = async (userId: string, query: Record<string, any>) =>
 };
 
 const lastGrabbedAsset = async (userId: string) => {
-  const assets = await Asset.find({ status: assetStatus.grabbed, teacher: userId }).populate([
+  const assets = await Asset.find({
+    status: assetStatus.grabbed,
+    teacher: userId,
+  }).populate([
     { path: "category", select: "name" },
     { path: "district", select: "name logo" },
     {
-      path: "teacher", select: "user role",
+      path: "teacher",
+      select: "user role",
       populate: {
-        path: "user", select: "name image email school",
+        path: "user",
+        select: "name image email school",
         populate: {
-          path: "school", select: "name"
-        }
-      }
+          path: "school",
+          select: "name",
+        },
+      },
     },
   ]);
 
   return assets[0];
-}
+};
 
 const grabAsset = async (userId: string, id: string) => {
-  const asset = await Asset.findById(id)
-    .populate([
-      { path: "teacher", select: "user role", populate: { path: "user", select: "name email" } }
-    ]);
-  if (!asset) throw new AppError(400, "Invalid asset ID!");
-  if (asset.status === assetStatus.grabbed) throw new AppError(400, "This asset is already grabbed!");
-
-  const updated = await Asset.findByIdAndUpdate(id, { status: assetStatus.grabbed, grabbedBy: userId }, { new: true }).populate([
-    { path: "teacher", select: "user role", populate: { path: "user", select: "name" } },
-    { path: "district", select: "name" },
-    { path: "grabbedBy", select: "user role", populate: { path: "user", select: "name" } }
+  const asset = await Asset.findById(id).populate([
+    {
+      path: "teacher",
+      select: "user role",
+      populate: { path: "user", select: "name email" },
+    },
   ]);
+  if (!asset) throw new AppError(400, "Invalid asset ID!");
+  if (asset.status === assetStatus.grabbed)
+    throw new AppError(400, "This asset is already grabbed!");
+
+  const updated = await Asset.findByIdAndUpdate(
+    id,
+    { status: assetStatus.grabbed, grabbedBy: userId },
+    { new: true }
+  ).populate([
+    {
+      path: "teacher",
+      select: "user role",
+      populate: { path: "user", select: "name" },
+    },
+    { path: "district", select: "name" },
+    {
+      path: "grabbedBy",
+      select: "user role",
+      populate: { path: "user", select: "name" },
+    },
+  ]);
+
+  let newChat = null;
   if (updated) {
     const subject = `Your asset has been grabbed - D.A.M`;
     const year = new Date().getFullYear().toString();
     const emailTemplatePath = "./src/app/emailTemplates/assetGrabbed.html";
 
     // Format
-    const formattedDate = format((updated as any).createdAt, 'MMM d, yyyy');
+    const formattedDate = format((updated as any).createdAt, "MMM d, yyyy");
     const auth = await Auth.findById(userId).populate([
       {
-        path: "user", select: "name email", populate: {
-          path: "school", select: "name"
-        }
-      }
+        path: "user",
+        select: "name email",
+        populate: {
+          path: "school",
+          select: "name",
+        },
+      },
     ]);
+
+    // create chat
+    const chatPayload = {
+      asset: id,
+    } as any;
+    newChat = await chatService.createChat(userId as any, chatPayload);
 
     fs.readFile(emailTemplatePath, "utf8", (err, data) => {
       if (err) throw new AppError(500, err.message || "Something went wrong");
       const emailContent = data
-        .replace('{{owner_name}}', (asset?.teacher as any)?.user.name)
-        .replace('{{year}}', year)
-        .replace('{{date_time}}', formattedDate)
-        .replace('{{claimer_name}}', (auth?.user as any)?.name)
-        .replace('{{claimer_school}}', (auth?.user as any)?.school.name)
+        .replace("{{owner_name}}", (asset?.teacher as any)?.user.name)
+        .replace("{{year}}", year)
+        .replace("{{date_time}}", formattedDate)
+        .replace("{{claimer_name}}", (auth?.user as any)?.name)
+        .replace("{{claimer_school}}", (auth?.user as any)?.school.name);
 
       sendEmail((asset?.teacher as any)?.user?.email, subject, emailContent);
-    })
+    });
   }
-  return updated;
+  return { asset: updated, newChat };
 };
 
-const updateAsset = async (id: string, payload: Partial<TAsset>, files?: TFile[]) => {
+const updateAsset = async (
+  id: string,
+  payload: Partial<TAsset>,
+  files?: TFile[]
+) => {
   const asset = await Asset.findById(id);
   if (!asset) throw new AppError(400, "Invalid asset ID!");
 
@@ -240,7 +298,9 @@ const updateAsset = async (id: string, payload: Partial<TAsset>, files?: TFile[]
   }
 
   if (files && files.length) {
-    const newImageUrls = await Promise.all(files.map(file => uploadToS3(file)));
+    const newImageUrls = await Promise.all(
+      files.map((file) => uploadToS3(file))
+    );
     payload.images = [...(asset.images || []), ...newImageUrls];
   }
 
@@ -248,14 +308,23 @@ const updateAsset = async (id: string, payload: Partial<TAsset>, files?: TFile[]
   return updated;
 };
 
-const deleteAssetImage = async (id: string, userId: string, imageUrl: string) => {
+const deleteAssetImage = async (
+  id: string,
+  userId: string,
+  imageUrl: string
+) => {
   const asset = await Asset.findById(id);
   if (!asset) throw new AppError(400, "Invalid asset ID!");
-  if (userId !== asset.teacher.toString()) throw new AppError(401, "Unauthorized! Only the teacher can delete images.");
+  if (userId !== asset.teacher.toString())
+    throw new AppError(
+      401,
+      "Unauthorized! Only the teacher can delete images."
+    );
 
-  if (!asset.images.includes(imageUrl)) throw new AppError(400, "Image not found in asset!");
+  if (!asset.images.includes(imageUrl))
+    throw new AppError(400, "Image not found in asset!");
   await deleteFromS3(imageUrl);
-  asset.images = asset.images.filter(img => img !== imageUrl);
+  asset.images = asset.images.filter((img) => img !== imageUrl);
   const updated = await asset.save();
   return updated;
 };
@@ -263,9 +332,17 @@ const deleteAssetImage = async (id: string, userId: string, imageUrl: string) =>
 const deleteAsset = async (id: string, userId: string) => {
   const asset = await Asset.findById(id);
   if (!asset) throw new AppError(400, "Invalid asset ID!");
-  if (userId !== asset.teacher.toString()) throw new AppError(401, "Unauthorized! Only the teacher can delete this asset.");
+  if (userId !== asset.teacher.toString())
+    throw new AppError(
+      401,
+      "Unauthorized! Only the teacher can delete this asset."
+    );
 
-  const deleted = await Asset.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
+  const deleted = await Asset.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true }
+  );
   return deleted;
 };
 
@@ -279,5 +356,5 @@ export default {
   deleteAssetImage,
   deleteAsset,
   getSingleAsset,
-  lastGrabbedAsset
+  lastGrabbedAsset,
 };

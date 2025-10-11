@@ -7,26 +7,44 @@ import Message from "../message/message.model";
 
 const createChat = async (userId: ObjectId, payload: TChat) => {
   const asset = await Asset.findById(payload.asset);
-  if (!asset) throw new AppError(400, "Invalid asset ID!")
-  if (userId == asset.teacher) throw new AppError(400, "You cannot create a chat with yourself!");
+  if (!asset) throw new AppError(400, "Invalid asset ID!");
+  if (userId == asset.teacher)
+    throw new AppError(400, "You cannot create a chat with yourself!");
+  const chat = await Chat.findOne({
+    asset: payload.asset,
+    participants: { $in: [userId] },
+  });
+  if (chat) return chat;
   const session = await startSession();
   session.startTransaction();
   try {
-    payload.participants = [
-      userId,
-      asset.teacher
-    ]
+    payload.participants = [userId, asset.teacher];
 
-    const existingChat = await Chat.findOne({ asset: payload.asset, participants: { $all: payload.participants } }).populate([
-      { path: "participants", select: "user role", populate: { path: "user", select: "name image" } }
+    const existingChat = await Chat.findOne({
+      asset: payload.asset,
+      participants: { $all: payload.participants },
+    }).populate([
+      {
+        path: "participants",
+        select: "user role",
+        populate: { path: "user", select: "name image" },
+      },
     ]);
     if (existingChat) return existingChat;
 
     await Chat.create([payload], { session });
 
-    const result = await Chat.findOne({ asset: payload.asset }, {}, { session }).populate([
-      { path: "participants", select: "user role", populate: { path: "user", select: "name image" } }
-    ])
+    const result = await Chat.findOne(
+      { asset: payload.asset },
+      {},
+      { session }
+    ).populate([
+      {
+        path: "participants",
+        select: "user role",
+        populate: { path: "user", select: "name image" },
+      },
+    ]);
 
     await session.commitTransaction();
     return result;
@@ -93,7 +111,7 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         localField: "asset",
         foreignField: "_id",
         as: "assetDetails",
-      }
+      },
     },
     {
       $lookup: {
@@ -101,7 +119,7 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         localField: "participants",
         foreignField: "_id",
         as: "participantsAuths",
-      }
+      },
     },
     {
       $lookup: {
@@ -109,13 +127,15 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         localField: "participantsAuths.user",
         foreignField: "_id",
         as: "participants",
-      }
+      },
     },
     // Stage 4: Project final shape with unseen count
     {
       $project: {
         lastMessage: { $ifNull: ["$lastMessage", null] },
-        unseenCount: { $ifNull: [{ $arrayElemAt: ["$unseenMessages.unseenCount", 0] }, 0] },
+        unseenCount: {
+          $ifNull: [{ $arrayElemAt: ["$unseenMessages.unseenCount", 0] }, 0],
+        },
         "assetDetails.name": 1,
         "assetDetails.images": 1,
         "assetDetails.description": 1,
@@ -123,17 +143,17 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         "participants.name": 1,
         "participants.image": 1,
         "participants._id": 1,
-        "participantsAuths._id": 1
+        "participantsAuths._id": 1,
       },
     },
     // Stage 5: Sort by lastMessage createdAt (latest first)
     {
-      $sort: { updatedAt: -1 }
+      $sort: { updatedAt: -1 },
     },
     // Stage 6: Limit the number of results
     {
-      $limit: limit
-    }
+      $limit: limit,
+    },
   ]);
 
   return chats;
@@ -144,7 +164,10 @@ const deleteChat = async (id: string, userId: ObjectId) => {
   if (!chat) throw new AppError(400, "Invalid chat ID!");
 
   if (!chat.participants.includes(userId)) {
-    throw new AppError(401, "Unauthorized! Only participants can delete this chat.");
+    throw new AppError(
+      401,
+      "Unauthorized! Only participants can delete this chat."
+    );
   }
 
   const session = await startSession();
