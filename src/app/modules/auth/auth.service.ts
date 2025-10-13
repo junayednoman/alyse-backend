@@ -8,7 +8,6 @@ import generateOTP from "../../utils/generateOTP";
 import { sendEmail } from "../../utils/sendEmail";
 import isUserExist from "../../utils/isUserExist";
 import fs from "fs";
-import path from "path";
 // import { firebaseAdmin } from "../../utils/sendNotification";
 // import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 

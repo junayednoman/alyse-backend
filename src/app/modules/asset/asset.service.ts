@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { TFile } from "../../interfaces/file.interface";
 import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
 import chatService from "../chat/chat.service";
+import Chat from "../chat/chat.model";
 
 const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
   const session = await startSession();
@@ -267,7 +268,11 @@ const grabAsset = async (userId: string, id: string) => {
     const chatPayload = {
       asset: id,
     } as any;
-    newChat = await chatService.createChat(userId as any, chatPayload);
+    const createdChat = await chatService.createChat(
+      userId as any,
+      chatPayload
+    );
+    newChat = await Chat.findById(createdChat?._id);
 
     fs.readFile(emailTemplatePath, "utf8", (err, data) => {
       if (err) throw new AppError(500, err.message || "Something went wrong");
