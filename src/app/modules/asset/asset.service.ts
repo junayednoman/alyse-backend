@@ -272,7 +272,13 @@ const grabAsset = async (userId: string, id: string) => {
       userId as any,
       chatPayload
     );
-    newChat = await Chat.findById(createdChat?._id).populate("participants");
+    newChat = await Chat.findById(createdChat?._id).populate([
+      {
+        path: "participants",
+        select: "user role",
+        populate: { path: "user", select: "name image" },
+      },
+    ]);
 
     fs.readFile(emailTemplatePath, "utf8", (err, data) => {
       if (err) throw new AppError(500, err.message || "Something went wrong");
