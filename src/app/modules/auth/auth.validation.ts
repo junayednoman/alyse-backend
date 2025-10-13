@@ -8,7 +8,11 @@ export const loginUserValidationSchema = z.object({
     .toLowerCase()
     .nonempty("Email is required"),
   password: z.string().nonempty("Password is required"),
+  fcmToken: z.string().optional(),
+  isMobileApp: z.boolean().optional().default(false),
 });
+
+export type TLoginUser = z.infer<typeof loginUserValidationSchema>;
 
 export const googleLoginValidationSchema = z.object({
   idToken: z.string().nonempty("ID token is required"),

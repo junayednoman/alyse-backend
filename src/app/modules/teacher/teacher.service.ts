@@ -179,7 +179,10 @@ const getTeachersByDistrictId = async (
 
 const getTeacherProfile = async (email: string) => {
   const auth = await Auth.findOne({ email });
-  const teacher = await Teacher.findOne({ email }).populate("school", "name");
+  const teacher = await Teacher.findOne({ email }).populate([
+    { path: "school", select: "name" },
+    { path: "district", select: "name" },
+  ]);
 
   return { ...teacher?.toObject(), authId: auth?._id };
 };

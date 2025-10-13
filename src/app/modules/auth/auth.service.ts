@@ -8,14 +8,11 @@ import generateOTP from "../../utils/generateOTP";
 import { sendEmail } from "../../utils/sendEmail";
 import isUserExist from "../../utils/isUserExist";
 import fs from "fs";
+import { TLoginUser } from "./auth.validation";
 // import { firebaseAdmin } from "../../utils/sendNotification";
 // import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
 
-const loginUser = async (payload: {
-  email: string;
-  password: string;
-  isRemember: boolean;
-}) => {
+const loginUser = async (payload: TLoginUser) => {
   const user = await isUserExist(payload.email);
 
   if (!user.isAccountVerified)
@@ -46,7 +43,7 @@ const loginUser = async (payload: {
     jwtPayload,
     config.jwt_access_secret as string,
     {
-      expiresIn: "12h",
+      expiresIn: payload.isMobileApp ? "60d" : "12h",
     }
   );
 
@@ -54,7 +51,7 @@ const loginUser = async (payload: {
     jwtPayload,
     config.jwt_refresh_secret as string,
     {
-      expiresIn: payload?.isRemember ? "60d" : "30d",
+      expiresIn: "60d",
     }
   );
   return { accessToken, refreshToken, role: user.role };
