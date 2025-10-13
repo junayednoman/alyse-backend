@@ -10,23 +10,14 @@ const createChat = async (userId: ObjectId, payload: TChat) => {
   if (!asset) throw new AppError(400, "Invalid asset ID!");
   if (userId == asset.teacher)
     throw new AppError(400, "You cannot create a chat with yourself!");
-  const chat = await Chat.findOne({
-    asset: payload.asset,
-    participants: { $in: [userId] },
-  }).populate([
-    {
-      path: "participants",
-      select: "user",
-      populate: { path: "user", select: "name image" },
-    },
-  ]);
-  if (chat) return chat;
+
   const session = await startSession();
   session.startTransaction();
   try {
     payload.participants = [userId, asset.teacher];
 
-    const existingChat = await Chat.findOne({
+    // Check if chat already exists with both participants
+    let chat = await Chat.findOne({
       asset: payload.asset,
       participants: { $all: payload.participants },
     }).populate([
@@ -36,12 +27,17 @@ const createChat = async (userId: ObjectId, payload: TChat) => {
         populate: { path: "user", select: "name image" },
       },
     ]);
-    if (existingChat) return existingChat;
 
-    await Chat.create([payload], { session });
+    if (chat) {
+      await session.endSession();
+      return chat;
+    }
 
-    const result = await Chat.findOne(
-      { asset: payload.asset },
+    // Create new chat if it doesn't exist
+    const newChat = await Chat.create([payload], { session });
+
+    chat = await Chat.findOne(
+      { _id: newChat[0]._id },
       {},
       { session }
     ).populate([
@@ -53,7 +49,7 @@ const createChat = async (userId: ObjectId, payload: TChat) => {
     ]);
 
     await session.commitTransaction();
-    return result;
+    return chat;
   } catch (error: any) {
     await session.abortTransaction();
     throw new AppError(500, error.message || "Error creating chat!");
