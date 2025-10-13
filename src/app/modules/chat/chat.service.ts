@@ -16,7 +16,8 @@ const createChat = async (userId: ObjectId, payload: TChat) => {
   }).populate([
     {
       path: "participants",
-      select: "image name"
+      select: "user",
+      populate: { path: "user", select: "name image" },
     },
   ]);
   if (chat) return chat;
