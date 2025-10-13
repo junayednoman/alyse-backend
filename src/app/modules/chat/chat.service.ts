@@ -13,7 +13,11 @@ const createChat = async (userId: ObjectId, payload: TChat) => {
   const chat = await Chat.findOne({
     asset: payload.asset,
     participants: { $in: [userId] },
-  });
+  }).populate([
+    {
+      path: "participants",
+    },
+  ]);
   if (chat) return chat;
   const session = await startSession();
   session.startTransaction();
