@@ -272,7 +272,7 @@ const grabAsset = async (userId: string, id: string) => {
       userId as any,
       chatPayload
     );
-    newChat = await Chat.findById(createdChat?._id);
+    newChat = await Chat.findById(createdChat?._id).populate("participants");
 
     fs.readFile(emailTemplatePath, "utf8", (err, data) => {
       if (err) throw new AppError(500, err.message || "Something went wrong");
