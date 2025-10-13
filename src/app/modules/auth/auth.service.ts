@@ -17,18 +17,6 @@ const loginUser = async (payload: {
   password: string;
   isRemember: boolean;
 }) => {
-  const folderPath = "uploads";
-  const files = fs.readdirSync(folderPath);
-
-  if (files.length > 0) {
-    files.forEach((file) => {
-      const filePath = path.join(folderPath, file);
-      if (fs.lstatSync(filePath).isFile()) {
-        fs.unlinkSync(filePath);
-      }
-    });
-  }
-
   const user = await isUserExist(payload.email);
 
   if (!user.isAccountVerified)

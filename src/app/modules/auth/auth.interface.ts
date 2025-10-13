@@ -5,7 +5,7 @@ export type TUserRole = "admin" | "principal" | "teacher";
 export type TAuth = {
   email: string;
   password: string;
-  user: ObjectId
+  user: ObjectId;
   role: TUserRole;
   isAccountVerified: boolean;
   otp?: string;
