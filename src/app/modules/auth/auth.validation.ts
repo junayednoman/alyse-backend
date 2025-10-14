@@ -1,12 +1,8 @@
 import { z } from "zod";
+import { emailZod, passwordZod } from "../../validation/global.validation";
 
 export const loginUserValidationSchema = z.object({
-  email: z
-    .string()
-    .email("Invalid email address")
-    .trim()
-    .toLowerCase()
-    .nonempty("Email is required"),
+  email: emailZod,
   password: z.string().nonempty("Password is required"),
   fcmToken: z.string().optional(),
   isMobileApp: z.boolean().optional().default(false),
@@ -14,57 +10,34 @@ export const loginUserValidationSchema = z.object({
 
 export type TLoginUser = z.infer<typeof loginUserValidationSchema>;
 
-export const googleLoginValidationSchema = z.object({
-  idToken: z.string().nonempty("ID token is required"),
+export const socialLoginZod = z.object({
+  email: emailZod,
+  name: z.string().optional(),
+  image: z.string().optional(),
+  fcmToken: z.string().optional(),
+  provider: z.enum(["google", "apple"]),
+  district: z.string().optional(),
+  school: z.string().optional(),
 });
 
+export type ISocialLogin = z.infer<typeof socialLoginZod>;
+
 export const emailValidationSchema = z.object({
-  email: z
-    .string()
-    .email("Invalid email address")
-    .trim()
-    .toLowerCase()
-    .nonempty("Email is required"),
+  email: emailZod,
 });
 
 export const verifyOtpSchema = z.object({
-  email: z
-    .string()
-    .email("Invalid email address")
-    .trim()
-    .toLowerCase()
-    .nonempty("Email is required"),
+  email: emailZod,
   otp: z.string().nonempty("OTP is required"),
   verifyAccount: z.boolean().optional(),
 });
 
 export const resetForgottenPasswordSchema = z.object({
-  email: z
-    .string()
-    .email("Invalid email address")
-    .trim()
-    .toLowerCase()
-    .nonempty("Email is required"),
-  password: z
-    .string()
-    .min(7, "Password must be at least 7 characters long")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(
-      /[^A-Za-z0-9]/,
-      "Password must contain at least one special character"
-    ),
+  email: emailZod,
+  password: passwordZod,
 });
 
 export const changePasswordValidationSchema = z.object({
   oldPassword: z.string().nonempty("Old Password is required"),
-  newPassword: z
-    .string()
-    .min(7, "Password must be at least 7 characters long")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(
-      /[^A-Za-z0-9]/,
-      "Password must contain at least one special character"
-    ),
+  newPassword: passwordZod,
 });

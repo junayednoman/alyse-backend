@@ -15,7 +15,7 @@ const userSchema = new Schema<TAuth>(
       refPath: "role",
       required: true,
     },
-    password: { type: String, required: true },
+    password: { type: String, default: undefined },
     role: {
       type: String,
       enum: [userRoles.admin, userRoles.principal, userRoles.teacher],
@@ -27,7 +27,11 @@ const userSchema = new Schema<TAuth>(
     otpAttempts: { type: Number, default: undefined },
     isOtpVerified: { type: Boolean, default: undefined },
     needsPasswordChange: { type: Boolean, default: undefined },
-    provider: { type: String, enum: ["google", "email"], default: "email" },
+    provider: {
+      type: String,
+      enum: ["google", "apple", "email"],
+      default: "email",
+    },
     isDeleted: { type: Boolean, default: false },
     isBlocked: { type: Boolean, default: false },
   },

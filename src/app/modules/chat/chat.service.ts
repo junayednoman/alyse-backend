@@ -118,6 +118,22 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
     {
       $lookup: {
         from: "auths",
+        localField: "assetDetails.teacher",
+        foreignField: "_id",
+        as: "assetOwnerAuth",
+      },
+    },
+    {
+      $lookup: {
+        from: "teachers",
+        localField: "assetOwnerAuth.user",
+        foreignField: "_id",
+        as: "assetOwner",
+      },
+    },
+    {
+      $lookup: {
+        from: "auths",
         localField: "participants",
         foreignField: "_id",
         as: "participantsAuths",
@@ -146,6 +162,8 @@ const getMyChats = async (userId: string, limit: number = 10): Promise<any> => {
         "participants.image": 1,
         "participants._id": 1,
         "participantsAuths._id": 1,
+        "assetOwner.name": 1,
+        "assetOwner.image": 1,
       },
     },
     // Stage 5: Sort by lastMessage createdAt (latest first)

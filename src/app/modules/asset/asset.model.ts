@@ -11,7 +11,17 @@ const AssetSchema = new Schema<TAsset>(
     images: { type: [String], required: true },
     category: { type: Types.ObjectId, ref: "Category", required: true },
     teacher: { type: Types.ObjectId, ref: "Auth", required: true },
-    status: { type: String, enum: [assetStatus.pending, assetStatus.approved, assetStatus.denied, assetStatus.grabbed], required: true, default: "pending" },
+    status: {
+      type: String,
+      enum: [
+        assetStatus.pending,
+        assetStatus.approved,
+        assetStatus.denied,
+        assetStatus.grabbed,
+      ],
+      required: true,
+      default: "pending",
+    },
     grabbedBy: { type: Types.ObjectId, ref: "Auth" },
     isDeleted: { type: Boolean, default: false },
     district: { type: Types.ObjectId, ref: "District", required: true },

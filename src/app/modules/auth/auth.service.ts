@@ -8,9 +8,12 @@ import generateOTP from "../../utils/generateOTP";
 import { sendEmail } from "../../utils/sendEmail";
 import isUserExist from "../../utils/isUserExist";
 import fs from "fs";
-import { TLoginUser } from "./auth.validation";
-// import { firebaseAdmin } from "../../utils/sendNotification";
-// import { DecodedIdToken } from "firebase-admin/lib/auth/token-verifier";
+import { ISocialLogin, TLoginUser } from "./auth.validation";
+import { userRoles } from "../../constants/global.constant";
+import { startSession } from "mongoose";
+import Teacher from "../teacher/teacher.model";
+import { District } from "../district/district.model";
+import School from "../school/school.model";
 
 const loginUser = async (payload: TLoginUser) => {
   const user = await isUserExist(payload.email);
@@ -57,18 +60,86 @@ const loginUser = async (payload: TLoginUser) => {
   return { accessToken, refreshToken, role: user.role };
 };
 
-const googleLogin = async (idToken: string) => {
-  console.log("idToken, ", idToken);
-  // try {
-  //   const decodedToken: DecodedIdToken | null = await firebaseAdmin
-  //     .auth()
-  //     .verifyIdToken(
-  //       "eyJhbGciOiJSUzI1NiIsImtpZCI6ImU4MWYwNTJhZWYwNDBhOTdjMzlkMjY1MzgxZGU2Y2I0MzRiYzM1ZjMiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiU2FtaW0gSmFtYW4iLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUNnOG9jSURwN3ZVTjMwUnFma3IxaVphemZTRFdHTU43T2hjVmw4YWp5cEpDX296aFRUdkhKbz1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9leHBpcnlkZWFscy00ODMxNiIsImF1ZCI6ImV4cGlyeWRlYWxzLTQ4MzE2IiwiYXV0aF90aW1lIjoxNzU5OTk1Mzc5LCJ1c2VyX2lkIjoiNDFmOEFLekw1eU15dWdDUGs0RTlqWHZONWlIMiIsInN1YiI6IjQxZjhBS3pMNXlNeXVnQ1BrNEU5alh2TjVpSDIiLCJpYXQiOjE3NTk5OTUzNzksImV4cCI6MTc1OTk5ODk3OSwiZW1haWwiOiJzYW1pbWNzZTlAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDM3MTU1NjIyNzIxODAwNzA2NTEiXSwiZW1haWwiOlsic2FtaW1jc2U5QGdtYWlsLmNvbSJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.RWAgHk6AB8XeAGpVlVAtNdPLKpCG41i6FiA-IQsGJ3mh7klD20muXPuff9PZGLAvwf2JSe2RaSHlzXMu9QITnskHImEt3qwDMdt1r9nUyZUgrFS9n1KLOP2VyQXo5heBsJDeGkh6p7SSq4sft5S95Zaj45"
-  //     );
-  //   console.log("decodedToken", decodedToken);
-  // } catch (error) {
-  //   console.log("error", error);
-  // }
+const socialLogin = async (payload: ISocialLogin) => {
+  // const decodedToken: DecodedIdToken | null = await firebaseAdmin
+  //   .auth()
+  //   .verifyIdToken(idToken);
+  // console.log("fcmToken", fcmToken);
+  // if (!decodedToken) throw new AppError(400, "login failed!");
+
+  const auth = await Auth.findOne({
+    email: payload.email,
+    isAccountVerified: true,
+  });
+
+  // generate token
+  const jwtPayload = {
+    email: payload.email,
+    role: userRoles.teacher,
+  } as any;
+
+  if (auth) {
+    if (auth?.provider !== payload.provider)
+      throw new AppError(
+        400,
+        `Your account was set up with ${auth.provider}! Use ${auth.provider} to log in.`
+      );
+
+    jwtPayload.id = auth._id;
+    if (payload.fcmToken) {
+      await Auth.findByIdAndUpdate(auth._id, { fcmToken: payload.fcmToken });
+    }
+  } else {
+    const session = await startSession();
+    try {
+      session.startTransaction();
+      const district = await District.findById(payload.district);
+      if (!district) throw new AppError(400, "Invalid district ID!");
+
+      const school = await School.findById(payload.school);
+      if (!school) throw new AppError(400, "Invalid school ID!");
+
+      const teacherData = {
+        name: payload.name,
+        image: payload.image,
+        email: payload.email,
+        district: payload.district,
+        school: payload.school,
+      };
+
+      const authData = {
+        email: payload.email,
+        role: userRoles.teacher,
+        isAccountVerified: true,
+        fcmToken: payload.fcmToken,
+        provider: payload.provider,
+      } as any;
+
+      const user = await Teacher.create(teacherData);
+      authData.user = user._id;
+
+      const newAuth = await Auth.create(authData);
+      jwtPayload.id = newAuth._id;
+      await session.commitTransaction();
+    } catch (error: any) {
+      await session.abortTransaction();
+      throw new AppError(500, error.message || "Error creating moderator!");
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const accessToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    {
+      expiresIn: config.jwt_refresh_expiration,
+    }
+  );
+
+  return { accessToken };
 };
 
 const sendOtp = async (payload: { email: string }) => {
@@ -288,7 +359,7 @@ const AuthServices = {
   changePassword,
   getNewAccessToken,
   changeUserStatus,
-  googleLogin,
+  socialLogin,
 };
 
 export default AuthServices;

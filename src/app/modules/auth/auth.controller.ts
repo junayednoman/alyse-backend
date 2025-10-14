@@ -7,17 +7,17 @@ const loginUser = handleAsyncRequest(async (req, res) => {
   const payload = req.body;
   const result = await AuthServices.loginUser(payload);
   // set refreshToken in cookie
-  const day = 24 * 60 * 60 * 1000
+  const day = 24 * 60 * 60 * 1000;
   const { refreshToken, accessToken } = result;
   const cookieOptions: any = {
     httpOnly: true,
-    secure: config.node_env === 'production', // Use secure in production
+    secure: config.node_env === "production", // Use secure in production
     maxAge: payload.isRemember ? 60 * day : 20 * day,
   };
 
-  if (config.node_env === 'production') cookieOptions.sameSite = 'none';
+  if (config.node_env === "production") cookieOptions.sameSite = "none";
 
-  res.cookie('refreshToken', refreshToken, cookieOptions);
+  res.cookie("refreshToken", refreshToken, cookieOptions);
 
   successResponse(res, {
     message: "User logged in successfully!",
@@ -25,22 +25,9 @@ const loginUser = handleAsyncRequest(async (req, res) => {
   });
 });
 
-const googleLogin = handleAsyncRequest(async (req, res) => {
-  const idToken = req.body.idToken;
-  const result = await AuthServices.googleLogin(idToken);
-  // // set refreshToken in cookie
-  // const day = 24 * 60 * 60 * 1000
-  // const { refreshToken, accessToken } = result;
-  // const cookieOptions: any = {
-  //   httpOnly: true,
-  //   secure: config.node_env === 'production', // Use secure in production
-  //   maxAge: payload.isRemember ? 60 * day : 20 * day,
-  // };
-
-  // if (config.node_env === 'production') cookieOptions.sameSite = 'none';
-
-  // res.cookie('refreshToken', refreshToken, cookieOptions);
-
+const socialLogin = handleAsyncRequest(async (req, res) => {
+  const payload = req.body;
+  const result = await AuthServices.socialLogin(payload);
   successResponse(res, {
     message: "User logged in successfully!",
     data: result,
@@ -49,7 +36,7 @@ const googleLogin = handleAsyncRequest(async (req, res) => {
 
 const logOut = handleAsyncRequest(async (req, res) => {
   const refreshToken = req?.cookies?.refreshToken;
-  if (refreshToken) res.clearCookie('refreshToken');
+  if (refreshToken) res.clearCookie("refreshToken");
 
   successResponse(res, {
     message: "User logged out successfully!",
@@ -87,17 +74,17 @@ const changePassword = handleAsyncRequest(async (req: any, res) => {
   const result = await AuthServices.changePassword(email, payload);
 
   // set refreshToken in cookie
-  const day = 24 * 60 * 60 * 1000
+  const day = 24 * 60 * 60 * 1000;
   const { refreshToken, accessToken } = result;
   const cookieOptions: any = {
     httpOnly: true,
-    secure: config.node_env === 'production', // Use secure in production
+    secure: config.node_env === "production", // Use secure in production
     maxAge: 3 * day,
   };
 
-  if (config.node_env === 'production') cookieOptions.sameSite = 'none';
+  if (config.node_env === "production") cookieOptions.sameSite = "none";
 
-  res.cookie('refreshToken', refreshToken, cookieOptions);
+  res.cookie("refreshToken", refreshToken, cookieOptions);
 
   successResponse(res, {
     message: "New password created successfully!",
@@ -118,9 +105,11 @@ const changeUserStatus = handleAsyncRequest(async (req, res) => {
   const id = req.params.id;
   const result = await AuthServices.changeUserStatus(id);
   const refreshToken = req?.cookies?.refreshToken;
-  if (refreshToken) res.clearCookie('refreshToken');
+  if (refreshToken) res.clearCookie("refreshToken");
   successResponse(res, {
-    message: `User account ${result?.isBlocked ? "blocked" : "unblocked"} successfully!`,
+    message: `User account ${
+      result?.isBlocked ? "blocked" : "unblocked"
+    } successfully!`,
     data: result,
   });
 });
@@ -128,13 +117,13 @@ const changeUserStatus = handleAsyncRequest(async (req, res) => {
 const AuthController = {
   loginUser,
   sendOtp,
-  googleLogin,
+  socialLogin,
   verifyOtp,
   resetForgottenPassword,
   changePassword,
   getNewAccessToken,
   logOut,
-  changeUserStatus
+  changeUserStatus,
 };
 
 export default AuthController;

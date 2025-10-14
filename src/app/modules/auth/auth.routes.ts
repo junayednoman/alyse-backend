@@ -3,10 +3,10 @@ import { handleZodValidation } from "../../middlewares/handleZodValidation";
 import {
   changePasswordValidationSchema,
   emailValidationSchema,
-  googleLoginValidationSchema,
   loginUserValidationSchema,
   resetForgottenPasswordSchema,
   verifyOtpSchema,
+  socialLoginZod,
 } from "./auth.validation";
 import AuthController from "./auth.controller";
 import authVerify from "../../middlewares/authVerify";
@@ -20,9 +20,9 @@ authRouters.post(
   AuthController.loginUser
 );
 authRouters.post(
-  "/google-login",
-  handleZodValidation(googleLoginValidationSchema),
-  AuthController.googleLogin
+  "/social-login",
+  handleZodValidation(socialLoginZod),
+  AuthController.socialLogin
 );
 authRouters.post(
   "/logout",
@@ -46,19 +46,15 @@ authRouters.post(
 );
 authRouters.post(
   "/change-password",
-  authVerify([userRoles.admin, userRoles.principal, userRoles.teacher,]),
+  authVerify([userRoles.admin, userRoles.principal, userRoles.teacher]),
   handleZodValidation(changePasswordValidationSchema),
   AuthController.changePassword
 );
-authRouters.get(
-  "/refresh-token",
-  AuthController.getNewAccessToken
-);
+authRouters.get("/refresh-token", AuthController.getNewAccessToken);
 authRouters.patch(
   "/change-status/:id",
   authVerify([userRoles.admin]),
   AuthController.changeUserStatus
-)
-
+);
 
 export default authRouters;

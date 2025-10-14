@@ -13,7 +13,7 @@ export type TAuth = {
   otpAttempts: number;
   isOtpVerified: boolean;
   needsPasswordChange: boolean;
-  provider: "google" | "email";
+  provider: "google" | "email" | "apple";
   isDeleted: boolean;
   isBlocked: boolean;
 };
