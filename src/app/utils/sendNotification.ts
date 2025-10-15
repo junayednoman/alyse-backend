@@ -1,6 +1,4 @@
 import admin from "firebase-admin";
-import { StatusCodes } from "http-status-codes";
-import { AppError } from "../classes/appError";
 import { TNotificationPayload } from "../modules/notification/notification.interface";
 import NotificationModel from "../modules/notification/notification.model";
 import firebaseJsonFile from "../private/alyse-firebase.json";
@@ -54,10 +52,11 @@ export const sendNotification = async (
     if (error?.code === "messaging/third-party-auth-error") {
       return null;
     } else {
-      throw new AppError(
-        StatusCodes.NOT_IMPLEMENTED,
-        error.message || "Failed to send notification"
-      );
+      console.log(error.message);
+      // throw new AppError(
+      //   StatusCodes.NOT_IMPLEMENTED,
+      //   error.message || "Failed to send notification"
+      // );
     }
   }
 };
