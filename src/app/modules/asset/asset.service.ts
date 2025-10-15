@@ -14,6 +14,8 @@ import { TFile } from "../../interfaces/file.interface";
 import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
 import chatService from "../chat/chat.service";
 import Chat from "../chat/chat.model";
+import { sendNotification } from "../../utils/sendNotification";
+import { TAuth } from "../auth/auth.interface";
 
 const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
   const session = await startSession();
@@ -264,6 +266,18 @@ const grabAsset = async (userId: string, id: string) => {
       },
     ]);
 
+    fs.readFile(emailTemplatePath, "utf8", (err, data) => {
+      if (err) throw new AppError(500, err.message || "Something went wrong");
+      const emailContent = data
+        .replace("{{owner_name}}", (asset?.teacher as any)?.user.name)
+        .replace("{{year}}", year)
+        .replace("{{date_time}}", formattedDate)
+        .replace("{{claimer_name}}", (auth?.user as any)?.name)
+        .replace("{{claimer_school}}", (auth?.user as any)?.school.name);
+
+      sendEmail((asset?.teacher as any)?.user?.email, subject, emailContent);
+    });
+
     // create chat
     const chatPayload = {
       asset: id,
@@ -280,17 +294,17 @@ const grabAsset = async (userId: string, id: string) => {
       },
     ]);
 
-    fs.readFile(emailTemplatePath, "utf8", (err, data) => {
-      if (err) throw new AppError(500, err.message || "Something went wrong");
-      const emailContent = data
-        .replace("{{owner_name}}", (asset?.teacher as any)?.user.name)
-        .replace("{{year}}", year)
-        .replace("{{date_time}}", formattedDate)
-        .replace("{{claimer_name}}", (auth?.user as any)?.name)
-        .replace("{{claimer_school}}", (auth?.user as any)?.school.name);
+    // send notification
+    const notificationPayload = {
+      receiver: asset.teacher,
+      title: "Asset Grabbed",
+      body: `${(auth?.user as any)?.name} has grabbed your asset`,
+    };
 
-      sendEmail((asset?.teacher as any)?.user?.email, subject, emailContent);
-    });
+    await sendNotification(
+      [(asset.teacher as unknown as TAuth).fcmToken as string],
+      notificationPayload
+    );
   }
   return { asset: updated, newChat };
 };
@@ -300,7 +314,7 @@ const updateAsset = async (
   payload: Partial<TAsset>,
   files?: TFile[]
 ) => {
-  const asset = await Asset.findById(id);
+  const asset = await Asset.findById(id).populate("teacher", "fcmToken");
   if (!asset) throw new AppError(400, "Invalid asset ID!");
 
   if (payload.category) {
@@ -316,6 +330,34 @@ const updateAsset = async (
   }
 
   const updated = await Asset.findByIdAndUpdate(id, payload, { new: true });
+
+  // send notification to user
+  if (
+    (updated && payload.status === assetStatus.approved) ||
+    asset.status === assetStatus.denied
+  ) {
+    let notificationTitle;
+    let notificationBody;
+
+    if (payload.status === assetStatus.approved) {
+      notificationTitle = "Asset Approved";
+      notificationBody = `Your asset has been approved by the principal.`;
+    } else if (payload.status === assetStatus.denied) {
+      notificationTitle = "Asset Denied";
+      notificationBody = `Your asset has been denied by the principal.`;
+    }
+
+    const notificationPayload = {
+      receiver: asset.teacher,
+      title: notificationTitle as string,
+      body: notificationBody as string,
+    };
+
+    await sendNotification(
+      [(asset.teacher as unknown as TAuth).fcmToken as string],
+      notificationPayload
+    );
+  }
   return updated;
 };
 

@@ -7,6 +7,7 @@ export type TAuth = {
   password: string;
   user: ObjectId;
   role: TUserRole;
+  fcmToken?: string;
   isAccountVerified: boolean;
   otp?: string;
   otpExpires?: Date;

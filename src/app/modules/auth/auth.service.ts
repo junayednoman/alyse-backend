@@ -14,6 +14,7 @@ import { startSession } from "mongoose";
 import Teacher from "../teacher/teacher.model";
 import { District } from "../district/district.model";
 import School from "../school/school.model";
+import { TTeacher } from "../teacher/teacher.interface";
 
 const loginUser = async (payload: TLoginUser) => {
   const user = await isUserExist(payload.email);
@@ -57,6 +58,12 @@ const loginUser = async (payload: TLoginUser) => {
       expiresIn: "60d",
     }
   );
+
+  // update fcmToken
+  if (payload.fcmToken) {
+    await Auth.findByIdAndUpdate(user._id, { fcmToken: payload.fcmToken });
+  }
+
   return { accessToken, refreshToken, role: user.role };
 };
 
@@ -90,6 +97,10 @@ const socialLogin = async (payload: ISocialLogin) => {
       await Auth.findByIdAndUpdate(auth._id, { fcmToken: payload.fcmToken });
     }
   } else {
+    if (!payload.district || !payload.school) {
+      throw new AppError(400, "Please provide district and school!");
+    }
+
     const session = await startSession();
     try {
       session.startTransaction();
@@ -341,14 +352,37 @@ const getNewAccessToken = async (token: string) => {
 };
 
 const changeUserStatus = async (id: string) => {
-  const user = await Auth.findById(id);
-  if (!user) throw new AppError(400, "Invalid user id!");
+  const auth = await Auth.findById(id).populate([
+    { path: "user", select: "name" },
+  ]);
+  if (!auth) throw new AppError(400, "Invalid user id!");
 
-  return await Auth.findByIdAndUpdate(
-    user._id,
-    { isBlocked: user.isBlocked ? false : true },
+  const newUser = await Auth.findByIdAndUpdate(
+    auth._id,
+    { isBlocked: auth.isBlocked ? false : true },
     { new: true }
   );
+
+  // send email
+  if (newUser?.isBlocked) {
+    const subject = `Your account has been blocked by admin - D.A.M`;
+    const year = new Date().getFullYear().toString();
+    const emailTemplatePath = "./src/app/emailTemplates/assetGrabbed.html";
+
+    fs.readFile(emailTemplatePath, "utf8", (err, data) => {
+      if (err) throw new AppError(500, err.message || "Something went wrong");
+      const emailContent = data
+        .replace(
+          "{{userName}}",
+          (auth.user as unknown as TTeacher)?.name as string
+        )
+        .replace("{{year}}", year);
+
+      sendEmail(newUser.email, subject, emailContent);
+    });
+  }
+
+  return newUser;
 };
 
 const AuthServices = {

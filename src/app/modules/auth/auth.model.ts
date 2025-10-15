@@ -15,6 +15,7 @@ const userSchema = new Schema<TAuth>(
       refPath: "role",
       required: true,
     },
+    fcmToken: { type: String, default: undefined },
     password: { type: String, default: undefined },
     role: {
       type: String,
