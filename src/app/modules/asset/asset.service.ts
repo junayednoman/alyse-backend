@@ -273,6 +273,7 @@ const grabAsset = async (userId: string, id: string) => {
         .replace("{{year}}", year)
         .replace("{{date_time}}", formattedDate)
         .replace("{{claimer_name}}", (auth?.user as any)?.name)
+        .replace("{{asset_name}}", asset.name)
         .replace("{{claimer_school}}", (auth?.user as any)?.school.name);
 
       sendEmail((asset?.teacher as any)?.user?.email, subject, emailContent);
