@@ -80,11 +80,17 @@ const getAllAssets = async (userId: string, query: Record<string, any>) => {
       select: "user role",
       populate: {
         path: "user",
-        select: "name image email school",
-        populate: {
-          path: "school",
-          select: "name",
-        },
+        select: "name image email school district",
+        populate: [
+          {
+            path: "school",
+            select: "name",
+          },
+          {
+            path: "district",
+            select: "name",
+          },
+        ],
       },
     },
     // { path: "district", select: "name logo" }
