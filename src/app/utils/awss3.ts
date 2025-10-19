@@ -2,12 +2,12 @@ import {
   DeleteObjectCommand,
   ObjectCannedACL,
   PutObjectCommand,
-} from '@aws-sdk/client-s3';
-import { S3Client } from '@aws-sdk/client-s3'
-import { AppError } from '../classes/appError';
-import config from '../config';
-import multer, { memoryStorage } from 'multer';
-import { TFile } from '../interfaces/file.interface';
+} from "@aws-sdk/client-s3";
+import { S3Client } from "@aws-sdk/client-s3";
+import { AppError } from "../classes/appError";
+import config from "../config";
+import multer, { memoryStorage } from "multer";
+import { TFile } from "../interfaces/file.interface";
 
 export const s3Client = new S3Client({
   endpoint: config.aws.endpoint,
@@ -16,11 +16,11 @@ export const s3Client = new S3Client({
     accessKeyId: `${config.aws.accessKeyId}`,
     secretAccessKey: `${config.aws.secretAccessKey}`,
   },
-})
+});
 
 export const upload = multer({
   storage: memoryStorage(),
-})
+});
 
 //upload a single file
 export const uploadToS3 = async (file: TFile): Promise<string> => {
@@ -37,15 +37,15 @@ export const uploadToS3 = async (file: TFile): Promise<string> => {
   try {
     const key = await s3Client.send(command);
     if (!key) {
-      throw new AppError(400, 'File Upload failed');
+      throw new AppError(400, "File Upload failed");
     }
     const url = `${config?.aws?.s3BaseUrl}/${fileName}`;
-    if (!url) throw new AppError(400, 'File Upload failed');
+    if (!url) throw new AppError(400, "File Upload failed");
 
     return url;
   } catch (error) {
     console.log(error);
-    throw new AppError(400, 'File Upload failed');
+    throw new AppError(400, "File Upload failed");
   }
 };
 
@@ -60,6 +60,6 @@ export const deleteFromS3 = async (url: string) => {
     });
     await s3Client.send(command);
   } catch (error) {
-    console.log('🚀 ~ deleteFromS3 ~ error:', error);
+    console.log("🚀 ~ deleteFromS3 ~ error:", error);
   }
 };
