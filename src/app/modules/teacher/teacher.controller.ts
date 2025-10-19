@@ -3,7 +3,7 @@ import { successResponse } from "../../utils/successResponse";
 import teacherService from "./teacher.service";
 
 const teacherSignup = handleAsyncRequest(async (req: any, res) => {
-  const payload = JSON.parse(req?.body?.payload || '{}');
+  const payload = JSON.parse(req?.body?.payload || "{}");
   const result = await teacherService.teacherSignup(payload, req.file);
   successResponse(res, {
     message: "Teacher signed up successfully!",
@@ -13,7 +13,7 @@ const teacherSignup = handleAsyncRequest(async (req: any, res) => {
 });
 
 const getAllTeachers = handleAsyncRequest(async (req: any, res) => {
-  const result = await teacherService.getAllTeachers(req.query);
+  const result = await teacherService.getAllTeachers(req.query, req.user.email);
   successResponse(res, {
     message: "Teachers retrieved successfully!",
     data: result,
@@ -21,7 +21,10 @@ const getAllTeachers = handleAsyncRequest(async (req: any, res) => {
 });
 
 const getTeachersByDistrictId = handleAsyncRequest(async (req: any, res) => {
-  const result = await teacherService.getTeachersByDistrictId(req.params.districtId, req.query);
+  const result = await teacherService.getTeachersByDistrictId(
+    req.params.districtId,
+    req.query
+  );
   successResponse(res, {
     message: "Teachers retrieved by district successfully!",
     data: result,
@@ -45,7 +48,10 @@ const getTeacherProfile = handleAsyncRequest(async (req: any, res) => {
 });
 
 const updateTeacherProfile = handleAsyncRequest(async (req: any, res) => {
-  const result = await teacherService.updateTeacherProfile(req.user.email, req.body);
+  const result = await teacherService.updateTeacherProfile(
+    req.user.email,
+    req.body
+  );
   successResponse(res, {
     message: "Teacher profile updated successfully!",
     data: result,
@@ -53,7 +59,10 @@ const updateTeacherProfile = handleAsyncRequest(async (req: any, res) => {
 });
 
 const updateTeacherProfileImage = handleAsyncRequest(async (req: any, res) => {
-  const result = await teacherService.updateTeacherProfileImage(req.user.email, req.file);
+  const result = await teacherService.updateTeacherProfileImage(
+    req.user.email,
+    req.file
+  );
   successResponse(res, {
     message: "Teacher profile image updated successfully!",
     data: result,
@@ -67,5 +76,5 @@ export default {
   getTeacherProfile,
   updateTeacherProfile,
   updateTeacherProfileImage,
-  getSingleTeacher
+  getSingleTeacher,
 };

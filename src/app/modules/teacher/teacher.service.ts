@@ -15,6 +15,7 @@ import School from "../school/school.model";
 import Asset from "../asset/asset.model";
 import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
 import { TFile } from "../../interfaces/file.interface";
+import { TPrincipal } from "../principal/principal.interface";
 
 const teacherSignup = async (
   { password, ...payload }: TTeacher & { password: string },
@@ -109,10 +110,20 @@ const teacherSignup = async (
   }
 };
 
-const getAllTeachers = async (query: Record<string, any>) => {
+const getAllTeachers = async (query: Record<string, any>, email: string) => {
+  const auth = await Auth.findOne({ email }).populate("user", "district");
   const searchableFields = ["name", "email", "roomNumber"];
   query.role = userRoles.teacher;
   query.fields = query.fields || "isBlocked user role";
+
+  if (auth?.role === userRoles.principal) {
+    const teacherUsers = await Teacher.find({
+      district: (auth.user as unknown as TPrincipal).district,
+    }).select("_id");
+
+    const teacherUserIds = teacherUsers.map((u) => u._id);
+    query.user = { $in: teacherUserIds };
+  }
   const teacherQuery = new QueryBuilder(Auth.find(), query)
     .search(searchableFields)
     .filter()
