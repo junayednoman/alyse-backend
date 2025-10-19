@@ -7,16 +7,20 @@ import { userRoles } from "../../constants/global.constant";
 import { upload } from "../../utils/awss3";
 const adminRouters = Router();
 
-adminRouters.get("/", authVerify([userRoles.admin]), adminControllers.getAdminProfile);
+adminRouters.get(
+  "/",
+  authVerify([userRoles.admin, userRoles.principal]),
+  adminControllers.getAdminProfile
+);
 adminRouters.put(
   "/",
-  authVerify([userRoles.admin]),
+  authVerify([userRoles.admin, userRoles.principal]),
   handleZodValidation(updateAdminProfileValidationSchema),
   adminControllers.updateAdminProfile
 );
 adminRouters.patch(
   "/image",
-  authVerify([userRoles.admin]),
+  authVerify([userRoles.admin, userRoles.principal]),
   upload.single("image"),
   adminControllers.updateAdminProfileImage
 );
