@@ -14,15 +14,23 @@ import { deleteFromS3, uploadToS3 } from "../../utils/awss3";
 import { TFile } from "../../interfaces/file.interface";
 
 const addPrincipal = async (payload: TPrincipal) => {
-  const existing = await Auth.findOne({ email: payload.email, isOtpVerified: true });
-  if (existing) throw new AppError(400, "Principal with this email already exists!");
-  const existingWithDistrictId = await Principal.findOne({ district: payload.district });
-  if (existingWithDistrictId) throw new AppError(400, "Principal with this district already exists!");
+  const existing = await Auth.findOne({
+    email: payload.email,
+    isOtpVerified: true,
+  });
+  if (existing)
+    throw new AppError(400, "Principal with this email already exists!");
+  const existingWithDistrictId = await Principal.findOne({
+    district: payload.district,
+  });
+  if (existingWithDistrictId)
+    throw new AppError(400, "Principal with this district already exists!");
 
   const session = await startSession();
-  const tempPassword = generateOTP();
+  const randomNum = generateOTP();
+  const tempPassword = `dam-${randomNum}`;
   const hashedPass = await bcrypt.hash(
-    `dam-${tempPassword.toString()}`,
+    tempPassword,
     Number(config.salt_rounds)
   );
 
@@ -35,8 +43,8 @@ const addPrincipal = async (payload: TPrincipal) => {
       user: principal[0]._id,
       role: userRoles.principal,
       isAccountVerified: true,
-      provider: "email"
-    }
+      provider: "email",
+    };
 
     await Auth.create([authData], { session });
 
@@ -47,11 +55,11 @@ const addPrincipal = async (payload: TPrincipal) => {
       fs.readFile(emailTemplatePath, "utf8", (err, data) => {
         if (err) throw new AppError(500, err.message || "Something went wrong");
         const emailContent = data
-          .replace('{{password}}', `dam-${tempPassword.toString()}`)
-          .replace('{{year}}', year);
+          .replace("{{password}}", `dam-${tempPassword.toString()}`)
+          .replace("{{year}}", year);
 
         return sendEmail(payload.email, subject, emailContent);
-      })
+      });
     }
 
     await session.commitTransaction();
@@ -66,8 +74,8 @@ const addPrincipal = async (payload: TPrincipal) => {
 
 const getAllPrincipals = async (query: Record<string, any>) => {
   const searchableFields = ["name", "email", "phone", "image"];
-  query.role = userRoles.principal
-  query.fields = query.fields || "isBlocked user role"
+  query.role = userRoles.principal;
+  query.fields = query.fields || "isBlocked user role";
   const categoryQuery = new QueryBuilder(Auth.find(), query)
     .search(searchableFields)
     .filter()
@@ -77,7 +85,10 @@ const getAllPrincipals = async (query: Record<string, any>) => {
 
   const total = await categoryQuery.countTotal();
   const result = await categoryQuery.queryModel.populate([
-    { path: "user", populate: { path: "district", select: "name logo code type" } }
+    {
+      path: "user",
+      populate: { path: "district", select: "name logo code type" },
+    },
   ]);
 
   const page = query.page || 1;
@@ -95,14 +106,19 @@ const getPrincipalById = async (id: string) => {
 const getPrincipalProfile = async (email: string) => {
   const principal = await Principal.findOne({ email });
   return principal;
-}
+};
 
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const updatePrincipalProfile = async (userEmail: string, { email, ...payload }: Partial<TPrincipal>) => {
+const updatePrincipalProfile = async (
+  userEmail: string,
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  { email, ...payload }: Partial<TPrincipal>
+) => {
   const principal = await Principal.findOne({ email: userEmail });
   if (!principal) throw new AppError(400, "Invalid principal ID!");
 
-  const updated = await Principal.findByIdAndUpdate(principal._id, payload, { new: true });
+  const updated = await Principal.findByIdAndUpdate(principal._id, payload, {
+    new: true,
+  });
   return updated;
 };
 
@@ -114,9 +130,13 @@ const updatePrincipalImage = async (email: string, file: TFile) => {
   }
   const image = await uploadToS3(file);
 
-  const updated = await Principal.findByIdAndUpdate(principal._id, { image }, { new: true });
+  const updated = await Principal.findByIdAndUpdate(
+    principal._id,
+    { image },
+    { new: true }
+  );
   if (principal?.image && image && updated) {
-    await deleteFromS3(principal?.image)
+    await deleteFromS3(principal?.image);
   }
   return updated;
 };
