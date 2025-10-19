@@ -55,7 +55,7 @@ const addPrincipal = async (payload: TPrincipal) => {
       fs.readFile(emailTemplatePath, "utf8", (err, data) => {
         if (err) throw new AppError(500, err.message || "Something went wrong");
         const emailContent = data
-          .replace("{{password}}", `dam-${tempPassword.toString()}`)
+          .replace("{{password}}", tempPassword)
           .replace("{{year}}", year);
 
         return sendEmail(payload.email, subject, emailContent);
