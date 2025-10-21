@@ -3,47 +3,56 @@ import { successResponse } from "../../utils/successResponse";
 import districtServices from "./district.service";
 
 const createDistrict = handleAsyncRequest(async (req: any, res) => {
-  const payload = JSON.parse(req?.body?.payload || '{}');
-  const result = await districtServices.createDistrict(payload, req?.file)
-  successResponse((res), {
+  const payload = JSON.parse(req?.body?.payload || "{}");
+  const result = await districtServices.createDistrict(payload, req?.file);
+  successResponse(res, {
     message: "District created successfully!",
     status: 201,
-    data: result
-  })
-})
+    data: result,
+  });
+});
+
+const verifyCode = handleAsyncRequest(async (req: any, res) => {
+  const result = await districtServices.verifyCode(req.body);
+  successResponse(res, {
+    message: "District code verified successfully!",
+    data: result,
+  });
+});
 
 const getDistricts = handleAsyncRequest(async (req: any, res) => {
-  const result = await districtServices.getDistricts(req.query)
-  successResponse((res), {
+  const result = await districtServices.getDistricts(req.query);
+  successResponse(res, {
     message: "District retrieved successfully!",
-    data: result
-  })
-})
+    data: result,
+  });
+});
 
 const updateDistrict = handleAsyncRequest(async (req: any, res) => {
-  const id = req?.params.id
-  const payload = JSON.parse(req?.body?.payload || '{}');
+  const id = req?.params.id;
+  const payload = JSON.parse(req?.body?.payload || "{}");
 
-  const result = await districtServices.updateDistrict(id, payload, req?.file)
-  successResponse((res), {
+  const result = await districtServices.updateDistrict(id, payload, req?.file);
+  successResponse(res, {
     message: "District updated successfully!",
-    data: result
-  })
-})
+    data: result,
+  });
+});
 
 const deleteDistrict = handleAsyncRequest(async (req: any, res) => {
-  const result = await districtServices.deleteDistrict(req.params.id)
-  successResponse((res), {
+  const result = await districtServices.deleteDistrict(req.params.id);
+  successResponse(res, {
     message: "District deleted successfully!",
-    data: result
-  })
-})
+    data: result,
+  });
+});
 
 const districtController = {
   createDistrict,
+  verifyCode,
   getDistricts,
   updateDistrict,
-  deleteDistrict
-}
+  deleteDistrict,
+};
 
 export default districtController;
