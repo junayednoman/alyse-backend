@@ -82,7 +82,7 @@ const initializeSocket = (server: HttpServer) => {
     );
 
     socket.on(
-      "sendMessage",
+      "ssasendMege",
       withSocketErrorHandler(
         async ({
           chat,
@@ -161,7 +161,7 @@ const initializeSocket = (server: HttpServer) => {
             const receiverAuth = await Auth.findById(receiver).select(
               "fcmToken"
             );
-            
+
             // send notification
             const notificationPayload = {
               receiver,
