@@ -58,7 +58,7 @@ const createAsset = async (userId: string, payload: TAsset, files: TFile[]) => {
 };
 
 const getAllAssets = async (userId: string, query: Record<string, any>) => {
-  const searchableFields = ["name", "material"];
+  const searchableFields = ["name", "material", "tags"];
   const auth = await Auth.findById(userId).populate("user");
   if (auth?.role !== userRoles.admin)
     query.district = (auth?.user as any)?.district as unknown as ObjectId;

@@ -8,6 +8,9 @@ export const AssetValidationSchema = z.object({
   category: z.string().refine((val) => /^[0-9a-fA-F]{24}$/.test(val), {
     message: "Invalid category ID format",
   }),
+  tags: z.array(z.string()).min(1, "At least one tag is required"),
 });
 
-export const deleteAssetImageValidationSchema = z.object({ imageUrl: z.string().url("Invalid image URL") })
+export const deleteAssetImageValidationSchema = z.object({
+  imageUrl: z.string().url("Invalid image URL"),
+});

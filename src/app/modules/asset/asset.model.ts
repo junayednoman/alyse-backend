@@ -23,6 +23,7 @@ const AssetSchema = new Schema<TAsset>(
       default: "pending",
     },
     grabbedBy: { type: Types.ObjectId, ref: "Auth" },
+    tags: { type: [String], required: true },
     isDeleted: { type: Boolean, default: false },
     district: { type: Types.ObjectId, ref: "District", required: true },
   },

@@ -1,0 +1,50 @@
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Node jobs
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.17.0
+
+      - name: Install dependencies
+        run: npm run install --frozen-lockfile
+
+      - name: Build app
+        run: npm run build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Node jobs
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.17.0
+
+      - name: Install dependencies
+        run: npm run install --frozen-lockfile
+
+      - name: Build app
+        run: npm run build
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts

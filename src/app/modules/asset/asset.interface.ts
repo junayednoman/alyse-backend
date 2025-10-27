@@ -9,7 +9,8 @@ export type TAsset = {
   category: ObjectId;
   teacher: ObjectId;
   status: "pending" | "approved" | "denied" | "grabbed";
-  grabbedBy: ObjectId
-  isDeleted: boolean
-  district: ObjectId
+  grabbedBy: ObjectId;
+  isDeleted: boolean;
+  tags: string[];
+  district: ObjectId;
 };
