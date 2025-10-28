@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.use("/api/v1", router);
 
 app.get("/", (req, res) => {
-  res.send("🐿️ DAM server is running!");
+  res.send("🐿️ DAM API server is running!");
 });
 
 // handle global errors
