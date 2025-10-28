@@ -72,7 +72,7 @@ jobs:
 
         run: |
           # Create deployment directory
-          ssh -i ~/.ssh/id_rsa$EC2_USER@$EC2_HOST "mkdir -p ~/server"
+          ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "mkdir -p ~/server"
 
           # Copy files to EC2 instance
           rsync -avz \
@@ -82,21 +82,21 @@ jobs:
             . $EC2_USER@EC2_HOST:~/server/
 
           # Install prod dependencies on EC2
-          ssh -i ~/.ssh/id_rsa$EC2_USER@$EC2_HOST 
+          ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST 
           "source ~/.bashrc &&
            cd ~/.server &&
            eval \$(fnm env) &&
            npm install --frozen-lockfile"
 
           # Stop existing pm2
-          ssh -i ~/.ssh/id_rsa$EC2_USER@$EC2_HOST 
+          ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST 
           "source ~/.bashrc &&
            cd ~/.server &&
            eval \$(fnm env) &&
            pm2 delete server || true"
 
           # Start app with pm2
-          ssh -i ~/.ssh/id_rsa$EC2_USER@$EC2_HOST 
+          ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST 
           "source ~/.bashrc && 
            cd ~/.server && 
            eval \$(fnm env) && 
