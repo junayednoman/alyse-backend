@@ -100,4 +100,4 @@ jobs:
           ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST '
           cd ~/server &&
           eval "$(fnm env)" &&
-          pm2 start npm --name server -- run start'
+          pm2 reload server || pm2 start npm --name server -- run start'
