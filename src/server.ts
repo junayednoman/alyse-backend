@@ -7,7 +7,6 @@ import initializeSocket from "./app/socket";
 
 let server: HttpServer;
 const socketServer = new HttpServer();
-
 async function main() {
   try {
     await mongoose.connect(config.database_url as string);
@@ -18,11 +17,11 @@ async function main() {
     // socket server
     initializeSocket(socketServer);
     socketServer.listen(Number(config.socket_port), () => {
-      console.log('🔌 Socket server is running on port:', config.socket_port);
+      console.log("🔌 Socket server is running on port:", config.socket_port);
     });
-
   } catch (error) {
     console.log("server error:", error);
+    console.log("server", server);
   }
 }
 
@@ -31,20 +30,20 @@ main();
 // create default admin user
 createAdmin();
 
-process.on("unhandledRejection", () => {
-  console.log(`unhandledRejection is detected, server shutting down... 😞`);
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
-  }
-  if (socketServer) socketServer.close(() => {
-    process.exit(1);
-  });
-  process.exit(1);
-});
+// process.on("unhandledRejection", () => {
+//   console.log(`unhandledRejection is detected, server shutting down... 😞`);
+//   if (server) {
+//     server.close(() => {
+//       process.exit(1);
+//     });
+//   }
+//   if (socketServer) socketServer.close(() => {
+//     process.exit(1);
+//   });
+//   process.exit(1);
+// });
 
-process.on("uncaughtException", () => {
-  console.log(`uncaughtException is detected, server shutting down... 😞`);
-  process.exit();
-});
+// process.on("uncaughtException", () => {
+//   console.log(`uncaughtException is detected, server shutting down... 😞`);
+//   process.exit();
+// });
