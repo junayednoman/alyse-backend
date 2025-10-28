@@ -19,6 +19,14 @@ jobs:
       - name: Install dependencies
         run: npm install --frozen-lockfile
 
+      - name: Run linting
+        run: npm run lint
+
+      - name: Add the firebase service json
+        run: |
+          mkdir -p src/app/private
+          echo '${{secrets.FIREBASE_SERVICE_JSON}}' > src/app/private/alyse-firebase.json
+
       - name: Build app
         run: npm run build
 
