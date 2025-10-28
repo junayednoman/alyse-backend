@@ -79,7 +79,7 @@ jobs:
             --exclude='.git' \
             --exclude='node_modules' \
             --exclude='.github' \
-            . $EC2_USER@EC2_HOST:~/server/
+            . $EC2_USER@$EC2_HOST:~/server/
 
           # Install prod dependencies on EC2
           ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST 
