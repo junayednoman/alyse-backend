@@ -54,7 +54,7 @@ jobs:
         run: npm run lint
 
       - name: Add .env file
-        run: echo '${{secrets.ENV_VARIABLES}}'' > .env
+        run: echo '${{secrets.ENV_VARIABLES}}' > .env
 
       - name: Build app
         run: npm run build
