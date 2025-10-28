@@ -87,18 +87,16 @@ jobs:
           eval "$(fnm env)" &&
           npm install --frozen-lockfile'
 
-
           # Stop existing pm2
-          ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST 
-          "export PATH=\"\$HOME/.fnm:$PATH\" && 
-           cd ~/server &&
-           eval \$(fnm env) &&
-           pm2 delete server || true"
+          ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST '
+          cd ~/server &&
+          eval "$(fnm env)" &&
+          pm2 delete server || true'
 
           # Start app with pm2
           ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST 
-          "export PATH=\"\$HOME/.fnm:$PATH\" && 
+          'export PATH=\"\$HOME/.fnm:$PATH\" && 
            cd ~/server && 
            eval \$(fnm env) && 
            cd ~/server && 
-           pm2 start npm --name "server" -- run start"
+           pm2 start npm --name "server" -- run start'
