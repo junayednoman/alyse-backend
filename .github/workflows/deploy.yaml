@@ -19,13 +19,13 @@ jobs:
       - name: Install dependencies
         run: npm install --frozen-lockfile
 
-      - name: Run linting
-        run: npm run lint
-
       - name: Add the firebase service json
         run: |
           mkdir -p src/app/private
           echo '${{secrets.FIREBASE_SERVICE_JSON}}' > src/app/private/alyse-firebase.json
+
+      - name: Run linting
+        run: npm run lint
 
       - name: Build app
         run: npm run build
@@ -44,7 +44,12 @@ jobs:
 
       - name: Install dependencies
         run: npm install --frozen-lockfile
-        
+
+      - name: Add the firebase service json
+        run: |
+          mkdir -p src/app/private
+          echo '${{secrets.FIREBASE_SERVICE_JSON}}' > src/app/private/alyse-firebase.json
+
       - name: Run linting
         run: npm run lint
 
@@ -67,33 +72,33 @@ jobs:
 
         run: |
           # Create deployment directory
-          ssh $EC2_USER@$EC2_HOST "mkdir -p ~/app"
+          ssh $EC2_USER@$EC2_HOST "mkdir -p ~/server"
 
-          # Copy files  to EC2 instance
+          # Copy files to EC2 instance
           rsync -avz \
             --exclude='.git' \
             --exclude='node_modules' \
             --exclude='.github' \
-            . $EC2_USER@EC2_HOST:~/app/
+            . $EC2_USER@EC2_HOST:~/server/
 
           # Install prod dependencies on EC2
           ssh EC2_USER@EC2_HOST 
           "source ~/.bashrc &&
-           cd ~/.app &&
+           cd ~/.server &&
            eval \$(fnm env) &&
            npm install --frozen-lockfile"
 
           # Stop existing pm2
           ssh EC2_USER@EC2_HOST 
           "source ~/.bashrc &&
-           cd ~/.app &&
+           cd ~/.server &&
            eval \$(fnm env) &&
            pm2 delete server || true"
 
           # Start app with pm2
           ssh EC2_USER@EC2_HOST 
           "source ~/.bashrc && 
-           cd ~/.app && 
+           cd ~/.server && 
            eval \$(fnm env) && 
-           cd ~/app && 
+           cd ~/server && 
            pm2 start npm --name "server" -- run start"
