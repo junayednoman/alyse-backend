@@ -82,7 +82,7 @@ const initializeSocket = (server: HttpServer) => {
     );
 
     socket.on(
-      "ssasendMege",
+      "sendMessage",
       withSocketErrorHandler(
         async ({
           chat,
