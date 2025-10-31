@@ -109,6 +109,7 @@ const initializeSocket = (server: HttpServer) => {
           };
 
           const message = await messageService.createMessage(messagePayload);
+
           io.to(chat.toString()).emit("newMessage", message);
 
           const chats = await chatService.getMyChats(userId);
