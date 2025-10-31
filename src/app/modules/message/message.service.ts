@@ -42,20 +42,19 @@ const getMessagesByChatId = async (query: Record<string, any>) => {
   const total = await messageQuery.countTotal();
   const messages = await messageQuery.queryModel.populate("chat", "asset");
 
-  const asset = await Asset.findById(chat.asset);
-  // .populate([
-  //   {
-  //     path: "teacher",
-  //     select: "user role",
-  //     populate: [
-  //       {
-  //         path: "user",
-  //         select: "roomNumber school",
-  //         populate: [{ path: "school", select: "name" }],
-  //       },
-  //     ],
-  //   },
-  // ]);
+  const asset = await Asset.findById(chat.asset).populate([
+    {
+      path: "teacher",
+      select: "user role",
+      populate: [
+        {
+          path: "user",
+          select: "roomNumber school",
+          populate: [{ path: "school", select: "name" }],
+        },
+      ],
+    },
+  ]);
   const page = query.page || 1;
   const limit = query.limit || 10;
   const meta = { total, page, limit };
