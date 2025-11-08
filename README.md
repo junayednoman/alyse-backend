@@ -41,7 +41,7 @@ Built with a scalable architecture, secure authentication, and real-time updates
 - **Framework:** Node.js + Express.js
 - **Databases:** MongoDB
 - **Real-time:** Socket.IO
-- **Cloud:** AWS (S3) / DigitalOcean
+- **Cloud:** AWS EC2, AWS S3
 
 ---
 
