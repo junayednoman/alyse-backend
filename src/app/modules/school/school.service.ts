@@ -11,7 +11,10 @@ const createSchool = async (payload: TSchool) => {
     throw new AppError(400, "Invalid district ID!");
   }
 
-  const existing = await School.findOne({ name: payload.name, district: payload.district });
+  const existing = await School.findOne({
+    name: payload.name,
+    district: payload.district,
+  });
   if (existing) {
     throw new AppError(400, "School already exists!");
   }
@@ -61,7 +64,10 @@ const updateSchool = async (id: string, payload: Partial<TSchool>) => {
     }
   }
 
-  const existingWithName = await School.findOne({ name: payload.name, district: payload.district || existing.district });
+  const existingWithName = await School.findOne({
+    name: payload.name,
+    district: payload.district || existing.district,
+  });
   if (existingWithName) {
     throw new AppError(400, "School already exists!");
   }
@@ -77,7 +83,11 @@ const deleteSchool = async (id: string) => {
   }
 
   const teacher = await Teacher.findOne({ school: id });
-  if (teacher) throw new AppError(400, "School has teachers, cannot delete!");
+  if (teacher)
+    throw new AppError(
+      400,
+      "This school is associated with a teacher, cannot delete!"
+    );
   const deleted = await School.findByIdAndDelete(id);
   return deleted;
 };

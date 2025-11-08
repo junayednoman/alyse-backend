@@ -17,17 +17,42 @@ import School from "../school/school.model";
 import { TTeacher } from "../teacher/teacher.interface";
 
 const loginUser = async (payload: TLoginUser) => {
-  const user = await isUserExist(payload.email);
+  const auth = await Auth.findOne({
+    email: payload.email,
+    isBlocked: false,
+    isDeleted: false,
+  });
 
-  if (!user.isAccountVerified)
+  if (!auth) throw new AppError(StatusCodes.NOT_FOUND, "User not found!");
+
+  if (!auth.isAccountVerified)
     throw new AppError(400, "Verify your account before logging in!");
-  if (user.needsPasswordChange)
+  if (auth.needsPasswordChange)
     throw new AppError(400, "Change your password before logging in!");
-  if (user.provider === "google")
+  if (auth.provider === "google")
     throw new AppError(400, "Your account created using Google!");
 
+  if (auth.role === userRoles.teacher || auth.role === userRoles.principal) {
+    const auth = await Auth.findOne({
+      email: payload.email,
+      isBlocked: false,
+      isDeleted: false,
+    }).populate([
+      {
+        path: "user",
+        select: "district",
+        populate: [{ path: "district", select: "isBlocked" }],
+      },
+    ]);
+    if ((auth?.user as any)?.district?.isBlocked) {
+      throw new AppError(
+        400,
+        "Your district is under restriction! Contact the admin."
+      );
+    }
+  }
   // Compare the password
-  const isPasswordMatch = await bcrypt.compare(payload.password, user.password);
+  const isPasswordMatch = await bcrypt.compare(payload.password, auth.password);
   if (!isPasswordMatch) {
     throw new AppError(
       StatusCodes.UNAUTHORIZED,
@@ -38,9 +63,9 @@ const loginUser = async (payload: TLoginUser) => {
 
   // generate token
   const jwtPayload = {
-    email: user.email,
-    role: user.role,
-    id: user._id,
+    email: auth.email,
+    role: auth.role,
+    id: auth._id,
   };
 
   const accessToken = jsonwebtoken.sign(
@@ -61,10 +86,10 @@ const loginUser = async (payload: TLoginUser) => {
 
   // update fcmToken
   if (payload.fcmToken) {
-    await Auth.findByIdAndUpdate(user._id, { fcmToken: payload.fcmToken });
+    await Auth.findByIdAndUpdate(auth._id, { fcmToken: payload.fcmToken });
   }
 
-  return { accessToken, refreshToken, role: user.role };
+  return { accessToken, refreshToken, role: auth.role };
 };
 
 const socialLogin = async (payload: ISocialLogin) => {

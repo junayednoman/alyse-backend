@@ -58,6 +58,25 @@ const updateDistrict = async (id: string, payload: TDistrict, file?: TFile) => {
   return result;
 };
 
+const toggleDistrictBlock = async (id: string) => {
+  const district = await District.findById(id);
+  if (!district) {
+    throw new AppError(400, "Invalid district id!");
+  }
+
+  const result = await District.findByIdAndUpdate(
+    district._id,
+    {
+      isBlocked: !district.isBlocked,
+    },
+    { new: true }
+  );
+  const message = `District ${
+    result?.isBlocked ? "blocked" : "unblocked"
+  } successfully!`;
+  return { result, message };
+};
+
 const deleteDistrict = async (id: string) => {
   const district = await District.findById(id);
   if (!district) {
@@ -67,10 +86,7 @@ const deleteDistrict = async (id: string) => {
   // check if any school is assigned to this district
   const associatedSchools = await School.findOne({ district: id });
   if (associatedSchools) {
-    throw new AppError(
-      400,
-      "One or more schools are assigned to this district!"
-    );
+    throw new AppError(400, "Schools are assigned to this district!");
   }
   const result = await District.findByIdAndDelete(district._id);
   if (result) await deleteFromS3(result?.logo);
@@ -83,6 +99,7 @@ const districtService = {
   getDistricts,
   updateDistrict,
   deleteDistrict,
+  toggleDistrictBlock,
 };
 
 export default districtService;

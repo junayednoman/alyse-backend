@@ -6,9 +6,10 @@ export const DistrictMongooseSchema = new Schema<TDistrict>(
     name: { type: String, required: true },
     logo: { type: String, required: true },
     code: { type: String, required: true },
-    type: { type: String, enum: ['strict', 'non-strict'], required: true },
+    type: { type: String, enum: ["strict", "non-strict"], required: true },
+    isBlocked: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-export const District = model<TDistrict>('District', DistrictMongooseSchema);
+export const District = model<TDistrict>("District", DistrictMongooseSchema);

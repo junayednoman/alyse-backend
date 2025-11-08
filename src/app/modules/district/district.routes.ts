@@ -35,7 +35,11 @@ router.put(
   handleZodValidation(updateDistrictValidationSchema, true),
   districtController.updateDistrict
 );
-
+router.patch(
+  "/:id",
+  authVerify([userRoles.admin]),
+  districtController.toggleDistrictBlock
+);
 router.delete(
   "/:id",
   authVerify([userRoles.admin]),

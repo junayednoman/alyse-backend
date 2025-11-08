@@ -39,6 +39,16 @@ const updateDistrict = handleAsyncRequest(async (req: any, res) => {
   });
 });
 
+const toggleDistrictBlock = handleAsyncRequest(async (req: any, res) => {
+  const { result, message } = await districtServices.toggleDistrictBlock(
+    req.params.id
+  );
+  successResponse(res, {
+    message,
+    data: result,
+  });
+});
+
 const deleteDistrict = handleAsyncRequest(async (req: any, res) => {
   const result = await districtServices.deleteDistrict(req.params.id);
   successResponse(res, {
@@ -53,6 +63,7 @@ const districtController = {
   getDistricts,
   updateDistrict,
   deleteDistrict,
+  toggleDistrictBlock,
 };
 
 export default districtController;
