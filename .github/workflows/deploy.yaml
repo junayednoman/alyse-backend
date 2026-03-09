@@ -106,20 +106,24 @@ jobs:
             --exclude='.github' \
             . $EC2_USER@$EC2_HOST:~/server/
 
-          # Install prod dependencies on EC2
-          ssh -i ~/.ssh/id_rsa -p "$EC2_PORT" $EC2_USER@$EC2_HOST '
-          cd ~/server &&
-          eval "$(fnm env)" &&
-          npm install --frozen-lockfile'
+          # Install dependencies and restart server on EC2
+          ssh -i ~/.ssh/id_rsa -p "$EC2_PORT" $EC2_USER@$EC2_HOST << 'EOF'
+          set -e
+          cd ~/server
 
-          # Stop existing pm2
-          ssh -i ~/.ssh/id_rsa -p "$EC2_PORT" $EC2_USER@$EC2_HOST '
-          cd ~/server &&
-          eval "$(fnm env)" &&
-          pm2 delete server || true'
+          # Load Node environment if available
+          if command -v fnm >/dev/null 2>&1; then
+            eval "$(fnm env)"
+          elif [ -s "$HOME/.nvm/nvm.sh" ]; then
+            . "$HOME/.nvm/nvm.sh"
+            nvm use --lts >/dev/null || true
+          fi
 
-          # Start app with pm2
-          ssh -i ~/.ssh/id_rsa -p "$EC2_PORT" $EC2_USER@$EC2_HOST '
-          cd ~/server &&
-          eval "$(fnm env)" &&
-          pm2 reload server || pm2 start npm --name server -- run start'
+          npm install --frozen-lockfile
+
+          if pm2 describe server >/dev/null 2>&1; then
+            pm2 restart server --update-env
+          else
+            pm2 start npm --name server -- run start
+          fi
+          EOF
