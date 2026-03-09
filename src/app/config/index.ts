@@ -30,7 +30,6 @@ export default {
     s3_api: process.env.S3_API,
     region: process.env.AWS_REGION,
     bucket: process.env.AWS_BUCKET_NAME,
-    endpoint: process.env.SPACES_API,
   },
   firebase_project_id: process.env.FIREBASE_PROJECT_ID,
   firebase_client_email: process.env.FIREBASE_CLIENT_EMAIL,

@@ -4,6 +4,7 @@ import config from "../config";
 import multer, { memoryStorage } from "multer";
 import { AppError } from "../classes/appError";
 import { TFile } from "../interfaces/file.interface";
+
 export const s3Client = new S3Client({
   // endpoint: config.aws.endpoint as string,
   region: `${config.aws.region}`,
